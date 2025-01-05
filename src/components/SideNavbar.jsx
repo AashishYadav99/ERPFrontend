@@ -12,10 +12,10 @@ import {
   FaChartBar,
   FaTags,
 } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 function SideNavbar({ collapsed }) {
-  const [activeIndex, setActiveIndex] = useState(null);
+  const location = useLocation(); // Get the current location
 
   const menuItems = [
     { icon: <MdDashboardCustomize />, text: "Dashboard", route: "#" },
@@ -25,9 +25,16 @@ function SideNavbar({ collapsed }) {
       text: "Sub Module Master",
       route: "/sub_module_master",
     },
+    {
+      icon: <FaUsers />,
+      text: "Function Master",
+      route: "/function_master",
+    },
+    { icon: <FaWarehouse />, text: "User Role", route: "/userrole" },
     { icon: <FaWarehouse />, text: "Warehouse", route: "/warehouse" },
     { icon: <FaLocationArrow />, text: "Location", route: "/location" },
     { icon: <FaBuilding />, text: "Company", route: "/company" },
+    { icon: <FaBox />, text: "User Management", route: "/user_management" },
     { icon: <FaBox />, text: "Item", route: "#" },
     { icon: <FaBox />, text: "Item Department", route: "#" },
     { icon: <FaBuilding />, text: "Brand Master", route: "/modulemasters" },
@@ -53,10 +60,6 @@ function SideNavbar({ collapsed }) {
     { icon: <FaMoneyBillWave />, text: "POS", route: "#" },
   ];
 
-  const handleItemClick = (index) => {
-    setActiveIndex(index);
-  };
-
   return (
     <div
       className={`flex flex-col bg-gradient-to-b from-gray-800 to-black text-white px-4 py-8 transition-all duration-500 ease-in-out space-y-2 overflow-y-auto ${
@@ -71,9 +74,9 @@ function SideNavbar({ collapsed }) {
             <MdDashboardCustomize />
           </div>
           {!collapsed && (
-            <button className="ml-1 text-white text-sm">
-              Valansa Lifescience
-            </button>
+            <Link to="/">
+              <button className="px-4  text-white text-sm">ERP</button>
+            </Link>
           )}
         </div>
 
@@ -82,16 +85,15 @@ function SideNavbar({ collapsed }) {
       {!collapsed && <hr className="border-gray-600 my-4" />}
 
       {menuItems.map((item, index) => (
-        <Link to={item.route}>
+        <Link to={item.route} key={index}>
           <div
             key={index}
             className={`flex justify-start items-center py-2 px-4 text-start rounded-lg cursor-pointer transition-all duration-300
               ${
-                activeIndex === index
+                location.pathname === item.route
                   ? "bg-blue-500 text-white"
                   : "hover:bg-gray-600"
               }`}
-            onClick={() => handleItemClick(index)} // Set the active index on click
           >
             <div className="p-2">{item.icon}</div>
             {!collapsed && (

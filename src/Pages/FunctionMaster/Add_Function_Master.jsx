@@ -3,10 +3,14 @@ import React, { useState, useEffect } from "react";
 import constantApi from "../../constantApi";
 import { useNavigate } from "react-router-dom";
 
-function SubModuleMasterForm() {
+function Add_Function_Master() {
   const [loader, setLoader] = useState(false);
 
   const [moduleMaster, setModuleMaster] = useState([]);
+  const [subModuleMaster, setSubModuleMaster] = useState([]);
+  const [functionMaster, setFunctionMaster] = useState([]);
+  const [filteredSubModules, setFilteredSubModules] = useState([]);
+
   const [moduleId, setModuleId] = useState();
   const navigate = useNavigate();
 
@@ -16,11 +20,11 @@ function SubModuleMasterForm() {
     .slice(0, 19)
     .replace("T", " ");
 
-  console.log("formattedDate", formattedDate);
   const [formData, setFormData] = useState({
     module_id: "",
-    sub_module_name: "",
-    sub_module_description: "",
+    sub_module_id: "",
+    function_master_name: "",
+    function_master_description: "",
     note1: "",
     note2: "",
     sorting_order: "",
@@ -38,20 +42,23 @@ function SubModuleMasterForm() {
   };
 
   const handleSubmit = async (e) => {
-    setLoader(true);
     e.preventDefault();
+    setLoader(true);
+
     console.log("Form Data Submitted:", formData);
     try {
       const response = await axios.post(
-        `${constantApi.baseUrl}/sub_module_master/create`,
+        `${constantApi.baseUrl}/function_master/create`,
         formData
       );
-      alert("Sub Module Master Added");
+      console.log("response is ", response);
+
+      alert("Function Master Added Successfully");
       setLoader(false);
-      navigate("/sub_module_master");
-      console.log("response is from sub module master ", response);
+      navigate("/function_master");
     } catch (err) {
       console.error("Error is ", err);
+      setLoader(false);
     }
   };
 
@@ -59,10 +66,10 @@ function SubModuleMasterForm() {
     axios
       .get(`${constantApi.baseUrl}/module_master/list`)
       .then((res) => {
-        console.log(
-          "response is from module master in add submodule master ",
-          res
-        );
+        // console.log(
+        //   "response is from module master in add submodule master ",
+        //   res.data.data
+        // );
         setModuleMaster(res.data.data);
       })
       .catch((err) => {
@@ -70,42 +77,89 @@ function SubModuleMasterForm() {
       });
   }, []);
 
+  useEffect(() => {
+    axios
+      .get(`${constantApi.baseUrl}/sub_module_master/list`)
+      .then((res) => {
+        // console.log(
+        //   "response is from module master in add sub module master ",
+        //   res.data.data
+        // );
+        setSubModuleMaster(res.data.data);
+      })
+      .catch((err) => {
+        console.error("Error is ", err);
+      });
+  }, []);
+
+  // console.log("subModuleMaster", subModuleMaster);
+
   const handleSelect = (id) => {
     setModuleId(id);
     setFormData({
       ...formData,
-      module_id: id,
+      function_master_id: id,
     });
+    const filtered = subModuleMaster.filter(
+      (subModule) => subModule.module_id === Number(id)
+    );
+    setFilteredSubModules(filtered);
   };
-
-  console.log("module id is ", moduleId);
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
       <div className="w-full max-w-4xl bg-white rounded-lg shadow-md p-8">
         <h1 className="text-2xl font-semibold text-gray-700 mb-6">
-          Sub Module Master Form
+          Add Function Master
         </h1>
         <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-6">
           {/* Module ID */}
           <div className="flex flex-col">
             <label className="text-gray-600 mb-2">Select Module </label>
             <select
-              onChange={(e) => handleSelect(e.target.value)}
+              onChange={(e) => {
+                const selectedModuleId = e.target.value;
+                setFormData({
+                  ...formData,
+                  module_id: selectedModuleId,
+                  sub_module_id: "",
+                });
+                const filtered = subModuleMaster.filter(
+                  (subModule) =>
+                    subModule.module_id === Number(selectedModuleId)
+                );
+                setFilteredSubModules(filtered);
+              }}
               name="module_id"
               id="module_id"
-              // className=" py-2 border-gray-100  "
-              class="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 focus:border-blue-500 hover:bg-gray-100 sm:text-sm"
+              className="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 focus:border-blue-500 hover:bg-gray-100 sm:text-sm"
             >
-              {/* Default option */}
-              <option value="">Select Module Master ID</option>
+              <option value="">Select Module</option>
               {moduleMaster.map((moduleData) => (
-                <option
-                  onClick={() => handleSelect(moduleData.module_id)}
-                  value={moduleData.module_id}
-                  className=" border-gray-100"
-                >
+                <option key={moduleData.module_id} value={moduleData.module_id}>
                   {moduleData.module_name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col">
+            <label className="text-gray-600 mb-2">Select Sub Module </label>
+            <select
+              onChange={(e) =>
+                setFormData({ ...formData, sub_module_id: e.target.value })
+              }
+              name="sub_module_id"
+              id="sub_module_id"
+              className="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 focus:border-blue-500 hover:bg-gray-100 sm:text-sm"
+            >
+              <option value="">Select Sub Module</option>
+              {filteredSubModules.map((subModuleData) => (
+                <option
+                  key={subModuleData.sub_module_id}
+                  value={subModuleData.sub_module_id}
+                >
+                  {subModuleData.sub_module_name}
                 </option>
               ))}
             </select>
@@ -113,11 +167,11 @@ function SubModuleMasterForm() {
 
           {/* Sub Module Name */}
           <div className="flex flex-col">
-            <label className="text-gray-600 mb-2">Sub Module Name</label>
+            <label className="text-gray-600 mb-2">Function Master Name</label>
             <input
               type="text"
-              name="sub_module_name"
-              value={formData.sub_module_name}
+              name="function_master_name"
+              value={formData.function_master_name}
               onChange={handleChange}
               placeholder="Enter Sub Module Name"
               className="border border-gray-300 rounded px-4 py-2"
@@ -126,10 +180,12 @@ function SubModuleMasterForm() {
 
           {/* Sub Module Description */}
           <div className="flex flex-col">
-            <label className="text-gray-600 mb-2">Sub Module Description</label>
+            <label className="text-gray-600 mb-2">
+              Function Master Description
+            </label>
             <textarea
-              name="sub_module_description"
-              value={formData.sub_module_description}
+              name="function_master_description"
+              value={formData.function_master_description}
               onChange={handleChange}
               placeholder="Enter Sub Module Description"
               className="border border-gray-300 rounded px-4 py-2"
@@ -244,4 +300,4 @@ function SubModuleMasterForm() {
   );
 }
 
-export default SubModuleMasterForm;
+export default Add_Function_Master;

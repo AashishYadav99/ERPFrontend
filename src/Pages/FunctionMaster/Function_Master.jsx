@@ -11,8 +11,8 @@ import axios from "axios"; // For API calls
 import constantApi from "../../constantApi";
 import Pagination from "../Pagination";
 
-const Sub_Module_Masters = () => {
-  const [subModuleMaster, setSubModuleMaster] = useState([]);
+const Function_Master = () => {
+  const [functionMaster, setFunctionMaster] = useState([]);
   const [popoverId, setPopoverId] = useState(null); // Track the currently open popover
   const popoverRefs = useRef({});
   const [searchInput, setSearchInput] = useState(""); // State for search input
@@ -22,14 +22,14 @@ const Sub_Module_Masters = () => {
   // Fetch module IDs from the backend when the component mounts
   useEffect(() => {
     axios
-      .get(`${constantApi.baseUrl}/sub_module_master/list`)
+      .get(`${constantApi.baseUrl}/function_master/list`)
       .then((res) => {
-        setSubModuleMaster(res.data.data);
+        setFunctionMaster(res.data.data);
       })
       .catch((err) => {
         console.error("Error is ", err);
       });
-  }, [subModuleMaster]);
+  }, [functionMaster]);
 
   const handleActivity = (id) => {
     setPopoverId(popoverId === id ? null : id);
@@ -39,25 +39,27 @@ const Sub_Module_Masters = () => {
   const handleEditActivity = (id) => {
     setPopoverId(popoverId === id ? null : id);
     console.log("id is from handleEditActivity ", id);
-    const submodule = subModuleMaster.find(
-      (submoduleData) => submoduleData.sub_module_id === id
+    const functionDetail = functionMaster.find(
+      (functionMasterData) => functionMasterData.function_master_id === id
     );
-    navigate("/edit_sub_module_master", { state: { submodule } });
+    navigate("/edit_function_master", { state: { functionDetail } });
   };
+
   const handleViewActivity = (id) => {
     setPopoverId(popoverId === id ? null : id);
-    console.log("id is from handleEditActivity ", id);
-    const submodule = subModuleMaster.find(
-      (submoduleData) => submoduleData.sub_module_id === id
+    console.log("id is from handleViewActivity ", id);
+    // Find the module data by id
+    const module = functionMaster.find(
+      (functionData) => functionData.function_master_id === id
     );
-    navigate("/view_sub_module_master", { state: { submodule } });
+    navigate("/view_function_master", { state: { module } });
   };
 
   const deleteModule = (id) => {
     console.log("id is for delete ", id);
 
     axios
-      .delete(`${constantApi.baseUrl}/sub_module_master/${id}`)
+      .delete(`${constantApi.baseUrl}/function_master/${id}`)
       .then((res) => {
         console.log(res.data.message);
       })
@@ -73,7 +75,7 @@ const Sub_Module_Masters = () => {
     if (selectAll) {
       setSelectedRows([]);
     } else {
-      const allIds = subModuleMaster.map((item) => item.sub_module_id);
+      const allIds = functionMaster.map((item) => item.function_master_id);
       setSelectedRows(allIds);
     }
     setSelectAll(!selectAll);
@@ -92,8 +94,8 @@ const Sub_Module_Masters = () => {
   }, [selectedRows]);
 
   // Filtered list based on search input
-  const filteredModules = subModuleMaster.filter((sub_module) =>
-    sub_module.sub_module_id.toString().includes(searchInput)
+  const filteredModules = functionMaster.filter((function_master) =>
+    function_master.function_master_id.toString().includes(searchInput)
   );
 
   const [isOpen, setIsOpen] = useState(false);
@@ -110,12 +112,12 @@ const Sub_Module_Masters = () => {
               <CgProfile className="text-black font-bold text-2xl" />
             </div>
             <div>
-              <span className="font-bold text-xl">Sub Module Master</span>
+              <span className="font-bold text-xl">Function Master</span>
             </div>
           </div>
           <div className="flex  gap-8 items-center text-black">
             <div>
-              <Link to="/add_sub_module_master">
+              <Link to="/add_function_master">
                 <button className="py-2 bg-gray-100  rounded-lg px-4 text-black font-bold">
                   + New
                 </button>
@@ -183,11 +185,11 @@ const Sub_Module_Masters = () => {
                 />
               </th>
               <th scope="col" className="px-2 py-3">
-                Sub Module Name
+                Function Master Name
               </th>
 
               <th scope="col" className="px-2 py-3">
-                Sub Module Description
+                Function Master Description
               </th>
 
               <th scope="col" className="px-2 py-3">
@@ -206,105 +208,53 @@ const Sub_Module_Masters = () => {
           </thead>
           <tbody>
             {filteredModules.length > 0 ? (
-              filteredModules.map((subModuleMasterData) => (
+              filteredModules.map((functionMasterData) => (
                 <tr
-                  key={subModuleMasterData.id}
+                  key={functionMasterData.id}
                   className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 text-center"
                 >
                   <td className="px-2 py-4">
                     <input
                       type="checkbox"
                       checked={selectedRows.includes(
-                        subModuleMasterData.sub_module_id
+                        functionMasterData.function_master_id
                       )}
                       onChange={() =>
-                        handleRowCheckbox(subModuleMasterData.sub_module_id)
+                        handleRowCheckbox(functionMasterData.function_master_id)
                       }
                       className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                     />
                   </td>
 
                   <td className="px-2 py-4">
-                    {subModuleMasterData.sub_module_name}
+                    {functionMasterData.function_master_name}
                   </td>
                   <td className="px-2 py-4">
-                    {subModuleMasterData.sub_module_description}
+                    {functionMasterData.function_master_description}
                   </td>
                   <td className="px-2 py-4">
-                    {subModuleMasterData.status === 1 ? "Active" : "Inactive"}
+                    {functionMasterData.status === 1 ? "Active" : "Inactive"}
                   </td>
-                  <td className="px-2 py-4">{subModuleMasterData.note1}</td>
-                  <td className="px-2 py-4">{subModuleMasterData.note2}</td>
+                  <td className="px-2 py-4">{functionMasterData.note1}</td>
+                  <td className="px-2 py-4">{functionMasterData.note2}</td>
 
-                  {/* <td className="px-6 py-4 text-center">
-                    <FiMoreVertical
-                      ref={(el) =>
-                        (popoverRefs.current[subModuleMasterData.id] = el)
-                      }
-                      onClick={() =>
-                        handleActivity(subModuleMasterData.sub_module_id)
-                      }
-                      className="flex justify-center cursor-pointer"
-                    />
-
-                    {popoverId === subModuleMasterData.sub_module_id && (
-                      <div
-                        data-popover
-                        role="tooltip"
-                        className="absolute inline-block w-32 text-sm text-gray-500 transition-opacity duration-300 bg-white border border-gray-200 rounded-lg shadow-sm opacity-100 dark:text-gray-400 dark:border-gray-600 dark:bg-gray-800"
-                        style={{
-                          top: `${
-                            popoverRefs.current[
-                              subModuleMasterData.sub_module_id
-                            ]?.offsetHeight
-                          }px`,
-                          right: "0",
-                          transform: "translateY(10px)",
-                        }}
-                      >
-                        <div
-                          onClick={() =>
-                            handleEditActivity(
-                              subModuleMasterData.sub_module_id
-                            )
-                          }
-                          className="px-3 py-2 bg-gray-100 border-b border-gray-200 rounded-t-lg dark:border-gray-600 dark:bg-gray-700"
-                        >
-                          <h3 className="font-semibold text-gray-900 dark:text-white cursor-pointer">
-                            Edit
-                          </h3>
-                        </div>
-                        <div
-                          onClick={() =>
-                            deleteModule(subModuleMasterData.sub_module_id)
-                          }
-                          className="px-3 py-2"
-                        >
-                          <p className="font-bold text-black cursor-pointer">
-                            Delete
-                          </p>
-                        </div>
-                        <div data-popper-arrow></div>
-                      </div>
-                    )}
-                  </td> */}
                   <td className="px-6 py-4 text-center">
                     <div className="relative inline-block">
                       {/* More Options Icon */}
                       <FiMoreVertical
                         ref={(el) =>
                           (popoverRefs.current[
-                            subModuleMasterData.sub_module_id
+                            functionMasterData.function_master_id
                           ] = el)
                         } // Store the reference to the button
                         onClick={() =>
-                          handleActivity(subModuleMasterData.sub_module_id)
+                          handleActivity(functionMasterData.function_master_id)
                         }
                         className="flex justify-center cursor-pointer"
                       />
 
                       {/* Dropdown Menu */}
-                      {popoverId === subModuleMasterData.sub_module_id && (
+                      {popoverId === functionMasterData.function_master_id && (
                         <div
                           data-popover
                           role="tooltip"
@@ -317,7 +267,7 @@ const Sub_Module_Masters = () => {
                           <div
                             onClick={() =>
                               handleEditActivity(
-                                subModuleMasterData.sub_module_id
+                                functionMasterData.function_master_id
                               )
                             }
                             className="px-2 py-1 hover:bg-blue-50  rounded-md flex justify-start items-center gap-4"
@@ -327,9 +277,12 @@ const Sub_Module_Masters = () => {
                               Edit
                             </p>
                           </div>
+
                           <div
                             onClick={() =>
-                              deleteModule(subModuleMasterData.sub_module_id)
+                              deleteModule(
+                                functionMasterData.function_master_id
+                              )
                             }
                             className="px-2 py-1 hover:bg-blue-50  rounded-md flex justify-start items-center gap-4"
                           >
@@ -338,10 +291,11 @@ const Sub_Module_Masters = () => {
                               Delete
                             </p>
                           </div>
+
                           <div
                             onClick={() =>
                               handleViewActivity(
-                                subModuleMasterData.sub_module_id
+                                functionMasterData.function_master_id
                               )
                             }
                             className="px-2 py-1 hover:bg-blue-50  rounded-md flex justify-start items-center gap-4"
@@ -372,4 +326,4 @@ const Sub_Module_Masters = () => {
   );
 };
 
-export default Sub_Module_Masters;
+export default Function_Master;

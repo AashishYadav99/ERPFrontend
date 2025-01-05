@@ -25,7 +25,7 @@ function Warehouse() {
 
   // Handle button click to toggle popover visibility
   const handleActivity = (id) => {
-    setPopoverId(popoverId === id ? null : id); // Toggle popover visibility
+    setPopoverId(popoverId === id ? null : id);
   };
   return (
     <>

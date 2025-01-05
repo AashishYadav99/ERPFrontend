@@ -1,73 +1,81 @@
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-import React, { useState } from "react";
 import constantApi from "../../constantApi";
-import { useNavigate } from "react-router-dom";
 
-function Add_Module_Master() {
+function Edit_Module_Master() {
+  const { state } = useLocation();
   const navigate = useNavigate();
-  const [loader, setLoader] = useState(false);
 
-  const currentDate = new Date();
-  const formattedDate = currentDate
-    .toISOString()
-    .slice(0, 19)
-    .replace("T", " "); // "YYYY-MM-DD HH:MM:SS"
-
-  console.log("formattedDate", formattedDate);
-
-  const [formData, setFormData] = useState({
+  const [editForm, setEditForm] = useState({
     module_name: "",
     module_description: "",
+    status: 1,
     note1: "",
     note2: "",
     sorting_order: "",
-    status: "1",
-    created_at: formattedDate,
     date1: "",
     date2: "",
-    created_by: 1,
-    updated_by: 1,
   });
 
-  const handleChange = (e) => {
+  const [editId, setEditId] = useState(null);
+  const [loader, setLoader] = useState(false);
+
+  useEffect(() => {
+    if (state && state.module) {
+      const module = state.module;
+      setEditId(module.module_id);
+      setEditForm({
+        module_name: module.module_name,
+        module_description: module.module_description,
+        status: module.status,
+        note1: module.note1,
+        note2: module.note2,
+        sorting_order: module.sorting_order,
+        date1: module.date1,
+        date2: module.date2,
+      });
+    }
+  }, [state]);
+
+  const handleEditChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setEditForm({ ...editForm, [name]: value });
   };
 
-  const handleSubmit = async (e) => {
-    setLoader(true);
+  const handleEditSubmit = (e) => {
     e.preventDefault();
-    console.log("Form Data Submitted:", formData);
-    try {
-      const response = await axios.post(
-        `${constantApi.baseUrl}/module_master/create`,
-        formData
-      );
-      alert("Module Master Added");
-      setLoader(false);
-      navigate("/module_master");
-      console.log("Response is from module master:", response);
-    } catch (err) {
-      setLoader(false);
-      console.error("Error is:", err);
-    }
+    setLoader(true);
+    axios
+      .put(`${constantApi.baseUrl}/module_master/${editId}`, editForm)
+      .then((res) => {
+        setLoader(false);
+        alert("Module updated successfully");
+        navigate("/module_master");
+        // Redirect or update state as needed
+      })
+      .catch((err) => {
+        setLoader(false);
+        console.error("Error updating module: ", err);
+        alert("Failed to update the module.");
+      });
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
       <div className="w-full max-w-4xl bg-white rounded-lg shadow-md p-8">
         <h1 className="text-2xl font-semibold text-gray-700 mb-6">
-          Add Module Master
+          Edit Module Master
         </h1>
-        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-6">
+        <form onSubmit={handleEditSubmit} className="grid grid-cols-2 gap-6">
           {/* Module Name */}
           <div className="flex flex-col">
             <label className="text-gray-600 mb-2">Module Name</label>
             <input
               type="text"
               name="module_name"
-              value={formData.module_name}
-              onChange={handleChange}
+              value={editForm.module_name}
+              onChange={handleEditChange}
               placeholder="Enter Module Name"
               className="border border-gray-300 rounded px-4 py-2"
             />
@@ -78,35 +86,35 @@ function Add_Module_Master() {
             <label className="text-gray-600 mb-2">Module Description</label>
             <textarea
               name="module_description"
-              value={formData.module_description}
-              onChange={handleChange}
+              value={editForm.module_description}
+              onChange={handleEditChange}
               placeholder="Enter Module Description"
               className="border border-gray-300 rounded px-4 py-2"
             />
           </div>
 
-          {/* Created By */}
+          {/* Note 1 */}
           <div className="flex flex-col">
             <label className="text-gray-600 mb-2">Note 1</label>
             <input
               type="text"
               name="note1"
-              value={formData.note1}
-              onChange={handleChange}
+              value={editForm.note1}
+              onChange={handleEditChange}
               placeholder="Enter Note 1"
               className="border border-gray-300 rounded px-4 py-2"
             />
           </div>
 
-          {/* Updated By */}
+          {/* Note 2 */}
           <div className="flex flex-col">
             <label className="text-gray-600 mb-2">Note 2</label>
             <input
               type="text"
               name="note2"
-              value={formData.note2}
-              onChange={handleChange}
-              placeholder="Enter  note 2"
+              value={editForm.note2}
+              onChange={handleEditChange}
+              placeholder="Enter Note 2"
               className="border border-gray-300 rounded px-4 py-2"
             />
           </div>
@@ -117,8 +125,8 @@ function Add_Module_Master() {
             <input
               type="number"
               name="sorting_order"
-              value={formData.sorting_order}
-              onChange={handleChange}
+              value={editForm.sorting_order}
+              onChange={handleEditChange}
               placeholder="Enter Sorting Order"
               className="border border-gray-300 rounded px-4 py-2"
             />
@@ -129,8 +137,8 @@ function Add_Module_Master() {
             <label className="text-gray-600 mb-2">Status</label>
             <select
               name="status"
-              value={formData.status}
-              onChange={handleChange}
+              value={editForm.status}
+              onChange={handleEditChange}
               className="border border-gray-300 rounded px-4 py-2"
             >
               <option value="1">Active</option>
@@ -144,19 +152,20 @@ function Add_Module_Master() {
             <input
               type="datetime-local"
               name="date1"
-              value={formData.date1}
-              onChange={handleChange}
+              value={editForm.date1}
+              onChange={handleEditChange}
               className="border border-gray-300 rounded px-4 py-2"
             />
           </div>
+
           {/* Date 2 */}
           <div className="flex flex-col">
             <label className="text-gray-600 mb-2">Date 2</label>
             <input
               type="datetime-local"
               name="date2"
-              value={formData.date2}
-              onChange={handleChange}
+              value={editForm.date2}
+              onChange={handleEditChange}
               className="border border-gray-300 rounded px-4 py-2"
             />
           </div>
@@ -171,7 +180,7 @@ function Add_Module_Master() {
               {loader ? (
                 <div className="loader inline-block w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin mr-2"></div>
               ) : null}
-              SUBMIT
+              Save Changes
             </button>
           </div>
         </form>
@@ -180,4 +189,4 @@ function Add_Module_Master() {
   );
 }
 
-export default Add_Module_Master;
+export default Edit_Module_Master;
