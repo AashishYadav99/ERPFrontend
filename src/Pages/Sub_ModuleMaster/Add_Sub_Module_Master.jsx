@@ -16,7 +16,6 @@ function SubModuleMasterForm() {
     .slice(0, 19)
     .replace("T", " ");
 
-  console.log("formattedDate", formattedDate);
   const [formData, setFormData] = useState({
     module_id: "",
     sub_module_name: "",

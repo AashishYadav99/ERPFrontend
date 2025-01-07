@@ -1,122 +1,168 @@
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { useEffect, useState } from "react";
 import constantApi from "../../constantApi";
 
 function UserRole() {
-  const [functionName, setFunctionName] = useState([]);
-  const roles = [
-    "System Administrator",
-    "Superuser",
-    "Business Administrator",
-    "Finance Manager",
-    "HR Manager",
-    "Warehouse Manager",
-    "Procurement Manager",
-    "Sales Manager",
-    "Production Manager",
-    "Quality Control Manager",
-    "Supply Chain Manager",
-    "Project Manager",
-    "End Users",
-    "Reports User",
-    "Security Administrator",
-  ];
+  const [modules, setModules] = useState([]);
+  const [sub_modules, setSub_Modules] = useState([]);
+  const [function_master, setFunction_master] = useState([]);
+  const [filteredSubModules, setFilteredSubModules] = useState({});
+
+  useEffect(() => {
+    axios
+      .get(`${constantApi.baseUrl}/module_master/list`)
+      .then((res) => setModules(res.data.data))
+      .catch((err) => console.error("Error fetching modules:", err));
+  }, []);
+
+  useEffect(() => {
+    axios
+      .get(`${constantApi.baseUrl}/sub_module_master/list`)
+      .then((res) => {
+        const subModules = res.data.data;
+        setSub_Modules(subModules);
+        // Pre-filter submodules for each module
+        const filtered = {};
+        subModules.forEach((subModule) => {
+          if (!filtered[subModule.module_id]) {
+            filtered[subModule.module_id] = [];
+          }
+          filtered[subModule.module_id].push(subModule);
+        });
+        setFilteredSubModules(filtered);
+        console.log("filtered", filtered);
+      })
+      .catch((err) => console.error("Error fetching submodules:", err));
+  }, []);
 
   useEffect(() => {
     axios
       .get(`${constantApi.baseUrl}/function_master/list`)
-      .then((res) => {
-        setFunctionName(res.data.data);
-      })
+      .then((res) => setFunction_master(res.data.data))
       .catch((err) => console.error("Error fetching function master:", err));
   }, []);
 
+  const data = [
+    {
+      documentType: "Leave Allocation",
+      roles: [
+        {
+          role: "HR Manager",
+          level: 0,
+          permissions: {
+            read: true,
+            write: true,
+            create: true,
+            delete: true,
+            submit: true,
+            cancel: true,
+            share: true,
+          },
+        },
+      ],
+    },
+  ];
+
   return (
-    <div className="p-4">
-      <div className="border border-gray-300 rounded-lg shadow-md">
-        {/* Role */}
-        <div>
-          <label className="block text-gray-600 font-medium mb-1">Role</label>
-          <select
-            name="role"
-            required
-            className="w-full px-4 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
-          >
-            <option value="" disabled>
-              Select a role
-            </option>
-            {roles.map((role, index) => (
-              <option key={index} value={role}>
-                {role}
-              </option>
-            ))}
-          </select>
-        </div>
+    <div className="px-4 py-2 z-50 w-[95%] bg-gray-100 text-black shadow-lg rounded-lg h-auto overflow-x-auto">
+      <h1 className="text-xl font-semibold mb-4">
+        Module, Submodule, and Functions
+      </h1>
+      <table className="w-full table-auto border-collapse">
+        <thead>
+          <tr>
+            <th className="px-4 py-2 border">Module Name</th>
+            <th className="px-4 py-2 border">Sub Module Name</th>
+            <th className="px-4 py-2 border">Function Name</th>
+            <th className="px-4 py-2 border">Actions </th>
+          </tr>
+        </thead>
+        <tbody>
+          {modules.map((moduleData, index) => {
+            const subModules = filteredSubModules[moduleData.module_id] || [];
+            if (subModules.length === 0) {
+              return (
+                <tr key={index}>
+                  <td className="px-4 py-2 border">{moduleData.module_name}</td>
+                  <td className="px-4 py-2 border">No Submodule</td>
+                  <td className="px-4 py-2 border">No Function</td>
+                </tr>
+              );
+            }
+            return subModules.map((subModuleData, subIndex) => {
+              const functions = function_master.filter(
+                (func) => func.sub_module_id === subModuleData.sub_module_id
+              );
 
-        <div className="flex justify-between items-center border-2 bg-blue-900 text-white border-blue-800 my-2 px-4 rounded-lg">
-          <div>
-            <p className="font-semibold">Permission</p>
-          </div>
-          <div>
-            <button className="border border-blue-500 bg-white text-black hover:text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition-all duration-300">
-              Save
-            </button>
-          </div>
-        </div>
+              if (functions.length === 0) {
+                return (
+                  <tr key={`${index}-${subIndex}`}>
+                    <td className="px-4 py-2 border">
+                      {moduleData.module_name}
+                    </td>
+                    <td className="px-4 py-2 border">
+                      {subModuleData.sub_module_name}
+                    </td>
+                    <td className="px-4 py-2 border">No Function</td>
+                  </tr>
+                );
+              }
+              return functions.map((func, funcIndex) => (
+                <tr key={`${index}-${subIndex}-${funcIndex}`}>
+                  {funcIndex === 0 && (
+                    <td
+                      rowSpan={functions.length}
+                      className="px-4 py-2 border bg-red-400"
+                    >
+                      {moduleData.module_name}
+                    </td>
+                  )}
+                  {funcIndex === 0 && (
+                    <td
+                      rowSpan={functions.length}
+                      className="px-4 py-2 border bg-green-600"
+                    >
+                      {subModuleData.sub_module_name}
+                    </td>
+                  )}
+                  <td className="px-4 py-2 border bg-blue-600">
+                    {func.function_master_name}
+                  </td>
 
-        {/* Table Rows */}
-        {functionName.map((data, index) => (
-          <div key={index} className="border-t border-gray-300">
-            {/* Function Name Row */}
-            <div className="flex items-center p-4">
-              <div className="w-1/4 font-medium">
-                {data.function_master_name}
-              </div>
-              <div className="w-3/4 flex justify-between">
-                <div className="w-1/3 text-center">Allow All</div>
-                <div className="w-1/3 text-center">Deny All</div>
-                <div className="w-1/3 text-center">Override All</div>
-              </div>
-            </div>
-
-            {/* Action Rows */}
-            {functionName.map((action, actionIndex) => (
-              <div
-                key={actionIndex}
-                className="flex items-center p-4 bg-gray-50"
-              >
-                <div className="w-1/4 text-gray-700">{action.note1}</div>
-                <div className="w-3/4 flex justify-between">
-                  <div className="w-1/3 text-center">
-                    <input
-                      type="radio"
-                      name={`permission-${index}`}
-                      value="Allow All"
-                      className="form-radio"
-                    />
-                  </div>
-                  <div className="w-1/3 text-center">
-                    <input
-                      type="radio"
-                      name={`permission-${index}`}
-                      value="Deny All"
-                      className="form-radio"
-                    />
-                  </div>
-                  <div className="w-1/3 text-center">
-                    <input
-                      type="radio"
-                      name={`permission-${index}`}
-                      value="Override All"
-                      className="form-radio"
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
+                  <tbody>
+                    {data.map((item, index) =>
+                      item.roles.map((role, idx) => (
+                        <tr
+                          key={`${index}-${idx}`}
+                          className="hover:bg-gray-100"
+                        >
+                          <td className="border border-gray-300 p-2">
+                            <div className="grid grid-cols-4 gap-2">
+                              {Object.entries(role.permissions).map(
+                                ([key, value]) => (
+                                  <div key={key} className="flex items-center">
+                                    <input
+                                      type="checkbox"
+                                      checked={value}
+                                      className="mr-2"
+                                      readOnly
+                                    />
+                                    <label className="text-sm">{key}</label>
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </tr>
+              ));
+            });
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
