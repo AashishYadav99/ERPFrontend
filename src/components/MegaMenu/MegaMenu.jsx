@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import constantApi from "../../constantApi";
-import { IoIosArrowUp } from "react-icons/io";
-import { IoIosArrowDroprightCircle } from "react-icons/io";
+import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
+import { FiSearch } from "react-icons/fi";
+import { BiExpand, BiCollapse } from "react-icons/bi";
 
 function MegaMenu() {
   const [modules, setModules] = useState([]);
@@ -11,19 +12,28 @@ function MegaMenu() {
   const [filteredSubModules, setFilteredSubModules] = useState({});
   const [activeSubModuleId, setActiveSubModuleId] = useState(null);
   const [filteredFunctions, setFilteredFunctions] = useState([]);
+  const [expanded, setExpanded] = useState(false);
 
-  const handleSubModuleClick = (subModuleData) => {
-    const subModuleId = subModuleData.sub_module_id;
-    if (activeSubModuleId === subModuleId) {
-      setActiveSubModuleId(null);
-      setFilteredFunctions([]);
+  const handleExpandAll = () => {
+    if (expanded) {
+      handleCollapseAll();
     } else {
-      const filtered = function_master.filter(
-        (func) => func.sub_module_id === subModuleId
-      );
-      setFilteredFunctions(filtered);
-      setActiveSubModuleId(subModuleId);
+      setExpanded(true);
+      setActiveSubModuleId("all");
+      const allFunctions = sub_modules.reduce((acc, subModule) => {
+        const filtered = function_master.filter(
+          (func) => func.sub_module_id === subModule.sub_module_id
+        );
+        return [...acc, ...filtered];
+      }, []);
+      setFilteredFunctions(allFunctions);
     }
+  };
+
+  const handleCollapseAll = () => {
+    setExpanded(false);
+    setActiveSubModuleId(null);
+    setFilteredFunctions([]);
   };
 
   useEffect(() => {
@@ -40,7 +50,6 @@ function MegaMenu() {
         const subModules = res.data.data;
         setSub_Modules(subModules);
 
-        // Pre-filter submodules for each module
         const filtered = {};
         subModules.forEach((subModule) => {
           if (!filtered[subModule.module_id]) {
@@ -61,65 +70,73 @@ function MegaMenu() {
   }, []);
 
   return (
-    <nav className="px-4 py-2 fixed top-18 left-1/2 transform -translate-x-1/2 z-50 w-[95%] bg-gray-100 text-white shadow-lg rounded-lg h-screen overflow-y-auto ">
-      <div className="flex justify-between items-center mb-4 px-4 shadow-gray-400 shadow-lg  bg-blue-900 rounded-lg ">
-        <div>
-          <h1 className="text-xl font-semibold">Menu</h1>
-        </div>
-        <div className="flex w-1/2 justify-between px-4 py-2">
+    <nav className="p-4 bg-gray-50 shadow-lg rounded-lg h-screen overflow-y-auto font-sans">
+      <header className="flex justify-between items-center mb-4">
+        <h1 className="text-xl font-semibold text-blue-800">Mega Menu</h1>
+        <div className="relative w-1/3">
+          <FiSearch className="absolute left-3 top-2.5 text-gray-500" />
           <input
             type="text"
             placeholder="Search..."
-            className="w-full px-2 border-2 border-gray-300 rounded-md focus:outline-none"
+            className="w-full pl-8 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 text-sm"
           />
         </div>
-        <div className="flex justify-between gap-4 items-center">
-          <button className="px-4 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all duration-300">
-            Expand All
-          </button>
-          <button className="px-4 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all duration-300">
-            Collapse All
+        <div className="flex gap-2">
+          <button
+            className="text-gray-600 hover:text-blue-500 transition duration-300"
+            onClick={handleExpandAll}
+            title={expanded ? "Collapse All" : "Expand All"}
+          >
+            {expanded ? <BiCollapse size={20} /> : <BiExpand size={20} />}
           </button>
         </div>
-      </div>
+      </header>
 
-      <div className="flex flex-col gap-4 mb-20">
+      <div className="space-y-4">
         {modules.map((moduleData, index) => (
-          <div key={index} className="flex flex-col">
-            <h2 className="py-3 px-5 font-medium text-lg text-blue-600 border-b-2 border-gray-200">
+          <div key={index} className="bg-white rounded-md shadow p-3">
+            <h2 className="text-lg font-medium text-blue-700 mb-2">
               {moduleData.module_name}
             </h2>
-            <div className="ml-6 mt-2">
-              <div className="grid grid-cols-4 gap-4">
-                {filteredSubModules[moduleData.module_id]?.map(
-                  (subModuleData, subIndex) => (
-                    <div
-                      key={subIndex}
-                      className="mb-4 p-3 border border-gray-300 rounded-md shadow-md"
+            <div className="grid grid-cols-2 gap-2">
+              {filteredSubModules[moduleData.module_id]?.map(
+                (subModuleData, subIndex) => (
+                  <div
+                    key={subIndex}
+                    className="border border-gray-200 rounded-md p-2 hover:shadow-md transition-shadow"
+                  >
+                    <button
+                      onClick={() => setActiveSubModuleId(subModuleData.sub_module_id)}
+                      className={`flex justify-between items-center w-full text-sm font-medium ${
+                        expanded || activeSubModuleId === subModuleData.sub_module_id
+                          ? "text-blue-600"
+                          : "text-gray-800"
+                      }`}
                     >
-                      <button
-                        onClick={() => handleSubModuleClick(subModuleData)}
-                        className={`text-md font-medium ${
-                          activeSubModuleId === subModuleData.sub_module_id
-                            ? "text-blue-400"
-                            : "text-black"
-                        }`}
-                      >
-                        {subModuleData.sub_module_name} +
-                      </button>
-                      {activeSubModuleId === subModuleData.sub_module_id && (
-                        <ul className="ml-4 mt-2 space-y-2">
-                          {filteredFunctions.map((func, funcIndex) => (
-                            <li key={funcIndex} className="text-sm text-black">
+                      {subModuleData.sub_module_name}
+                      {activeSubModuleId === subModuleData.sub_module_id ? (
+                        <IoIosArrowUp className="ml-2" />
+                      ) : (
+                        <IoIosArrowDown className="ml-2" />
+                      )}
+                    </button>
+                    {(expanded || activeSubModuleId === subModuleData.sub_module_id) && (
+                      <ul className="mt-2 space-y-1">
+                        {function_master
+                          .filter((func) => func.sub_module_id === subModuleData.sub_module_id)
+                          .map((func, funcIndex) => (
+                            <li
+                              key={funcIndex}
+                              className="text-xs text-gray-600 hover:text-blue-500"
+                            >
                               {func.function_master_name}
                             </li>
                           ))}
-                        </ul>
-                      )}
-                    </div>
-                  )
-                )}
-              </div>
+                      </ul>
+                    )}
+                  </div>
+                )
+              )}
             </div>
           </div>
         ))}
