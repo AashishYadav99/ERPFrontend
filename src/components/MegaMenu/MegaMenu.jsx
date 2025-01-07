@@ -95,7 +95,7 @@ function MegaMenu() {
       <div className="space-y-4">
         {modules.map((moduleData, index) => (
           <div key={index} className="bg-white rounded-md shadow p-3">
-            <h2 className="text-lg font-medium text-blue-700 mb-2">
+            <h2 className="text-medium font-medium text-blue-700 mb-2">
               {moduleData.module_name}
             </h2>
             <div className="grid grid-cols-2 gap-2">

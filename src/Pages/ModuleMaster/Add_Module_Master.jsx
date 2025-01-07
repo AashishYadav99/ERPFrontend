@@ -13,8 +13,6 @@ function Add_Module_Master() {
     .slice(0, 19)
     .replace("T", " "); // "YYYY-MM-DD HH:MM:SS"
 
-  console.log("formattedDate", formattedDate);
-
   const [formData, setFormData] = useState({
     module_name: "",
     module_description: "",
@@ -37,7 +35,6 @@ function Add_Module_Master() {
   const handleSubmit = async (e) => {
     setLoader(true);
     e.preventDefault();
-    console.log("Form Data Submitted:", formData);
     try {
       const response = await axios.post(
         `${constantApi.baseUrl}/module_master/create`,
@@ -46,10 +43,9 @@ function Add_Module_Master() {
       alert("Module Master Added");
       setLoader(false);
       navigate("/module_master");
-      console.log("Response is from module master:", response);
     } catch (err) {
       setLoader(false);
-      console.error("Error is:", err);
+      console.error("Error:", err);
     }
   };
 
@@ -62,116 +58,137 @@ function Add_Module_Master() {
         <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-6">
           {/* Module Name */}
           <div className="flex flex-col">
-            <label className="text-gray-600 mb-2">Module Name</label>
+            <label className="text-sm font-medium text-gray-600 mb-1">
+              Module Name
+            </label>
             <input
               type="text"
               name="module_name"
               value={formData.module_name}
               onChange={handleChange}
               placeholder="Enter Module Name"
-              className="border border-gray-300 rounded px-4 py-2"
+              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
             />
           </div>
 
           {/* Module Description */}
           <div className="flex flex-col">
-            <label className="text-gray-600 mb-2">Module Description</label>
+            <label className="text-sm font-medium text-gray-600 mb-1">
+              Module Description
+            </label>
             <textarea
               name="module_description"
               value={formData.module_description}
               onChange={handleChange}
               placeholder="Enter Module Description"
-              className="border border-gray-300 rounded px-4 py-2"
+              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none h-10 resize-none"
+              rows={1}
             />
           </div>
 
-          {/* Created By */}
+          {/* Note 1 */}
           <div className="flex flex-col">
-            <label className="text-gray-600 mb-2">Note 1</label>
+            <label className="text-sm font-medium text-gray-600 mb-1">
+              Note 1
+            </label>
             <input
               type="text"
               name="note1"
               value={formData.note1}
               onChange={handleChange}
               placeholder="Enter Note 1"
-              className="border border-gray-300 rounded px-4 py-2"
+              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
             />
           </div>
 
-          {/* Updated By */}
+          {/* Note 2 */}
           <div className="flex flex-col">
-            <label className="text-gray-600 mb-2">Note 2</label>
+            <label className="text-sm font-medium text-gray-600 mb-1">
+              Note 2
+            </label>
             <input
               type="text"
               name="note2"
               value={formData.note2}
               onChange={handleChange}
-              placeholder="Enter  note 2"
-              className="border border-gray-300 rounded px-4 py-2"
+              placeholder="Enter Note 2"
+              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
             />
           </div>
 
-          {/* Sorting Order */}
-          <div className="flex flex-col">
-            <label className="text-gray-600 mb-2">Sorting Order</label>
-            <input
-              type="number"
-              name="sorting_order"
-              value={formData.sorting_order}
-              onChange={handleChange}
-              placeholder="Enter Sorting Order"
-              className="border border-gray-300 rounded px-4 py-2"
-            />
+          {/* Status, Sorting Order, Date 1, Date 2 */}
+          <div className="grid grid-cols-4 gap-4 col-span-2">
+            {/* Status */}
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-600 mb-1">
+                Status
+              </label>
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              >
+                <option value="1">Active</option>
+                <option value="0">Inactive</option>
+              </select>
+            </div>
+
+            {/* Sorting Order */}
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-600 mb-1">
+                Sorting Order
+              </label>
+              <input
+                type="number"
+                name="sorting_order"
+                value={formData.sorting_order}
+                onChange={handleChange}
+                placeholder="Order"
+                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              />
+            </div>
+
+            {/* Date 1 */}
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-600 mb-1">
+                Date 1
+              </label>
+              <input
+                type="date"
+                name="date1"
+                value={formData.date1}
+                onChange={handleChange}
+                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              />
+            </div>
+
+            {/* Date 2 */}
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-600 mb-1">
+                Date 2
+              </label>
+              <input
+                type="date"
+                name="date2"
+                value={formData.date2}
+                onChange={handleChange}
+                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              />
+            </div>
           </div>
 
-          {/* Status */}
-          <div className="flex flex-col">
-            <label className="text-gray-600 mb-2">Status</label>
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              className="border border-gray-300 rounded px-4 py-2"
-            >
-              <option value="1">Active</option>
-              <option value="0">Inactive</option>
-            </select>
-          </div>
-
-          {/* Date 1 */}
-          <div className="flex flex-col">
-            <label className="text-gray-600 mb-2">Date 1</label>
-            <input
-              type="datetime-local"
-              name="date1"
-              value={formData.date1}
-              onChange={handleChange}
-              className="border border-gray-300 rounded px-4 py-2"
-            />
-          </div>
-          {/* Date 2 */}
-          <div className="flex flex-col">
-            <label className="text-gray-600 mb-2">Date 2</label>
-            <input
-              type="datetime-local"
-              name="date2"
-              value={formData.date2}
-              onChange={handleChange}
-              className="border border-gray-300 rounded px-4 py-2"
-            />
-          </div>
-
-          {/* Buttons */}
-          <div className="flex justify-end gap-4 mt-8">
+          {/* Submit Button */}
+          <div className="col-span-2 flex justify-center mt-4">
             <button
               type="submit"
-              className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 flex items-center"
+              className="bg-blue-500 text-white px-6 py-2 rounded-md text-sm hover:bg-blue-600 flex items-center"
               disabled={loader}
             >
               {loader ? (
                 <div className="loader inline-block w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin mr-2"></div>
               ) : null}
-              SUBMIT
+              Submit
             </button>
           </div>
         </form>

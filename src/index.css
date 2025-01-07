@@ -1,3 +1,31 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Scrollbar styles for the entire portal */
+::-webkit-scrollbar {
+    width: 8px; /* Make the scrollbar thinner */
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #d1d5db, #9ca3af); /* Gradient for the scrollbar thumb */
+    border-radius: 10px; /* Rounded edges for the scrollbar thumb */
+    border: 2px solid transparent; /* Add space around the thumb */
+    background-clip: padding-box; /* Prevent the border from overlapping the gradient */
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #9ca3af, #6b7280); /* Darker gradient on hover */
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #f9fafb; /* Light background for the scrollbar track */
+    border-radius: 10px; /* Rounded edges for the scrollbar track */
+  }
+  
+  ::-webkit-scrollbar-track:hover {
+    background: #e5e7eb; /* Slightly darker background on hover */
+  }
+  
+  /* Add padding or other customizations as needed */
+  
