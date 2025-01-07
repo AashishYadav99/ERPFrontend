@@ -4,10 +4,11 @@ import axios from "axios";
 import constantApi from "../../constantApi";
 function Edit_Sub_Module_Master() {
   const { state } = useLocation();
-  const navigate = useNavigate();
-  //   console.log("state", state);
+  console.log("state", state);
 
+  const navigate = useNavigate();
   const [editForm, setEditForm] = useState({
+    module_id: "",
     sub_module_name: "",
     sub_module_description: "",
     status: 1,
@@ -18,6 +19,9 @@ function Edit_Sub_Module_Master() {
     date2: "",
   });
 
+  const [moduleMaster, setModuleMaster] = useState([]);
+  const [moduleId, setModuleId] = useState();
+
   const [editId, setEditId] = useState(null);
   const [loader, setLoader] = useState(false);
 
@@ -26,6 +30,7 @@ function Edit_Sub_Module_Master() {
       const sub_module = state.submodule;
       setEditId(sub_module.sub_module_id);
       setEditForm({
+        module_id: moduleMaster.module_id,
         sub_module_name: sub_module.sub_module_name,
         sub_module_description: sub_module.sub_module_description,
         status: sub_module.status,
@@ -43,12 +48,29 @@ function Edit_Sub_Module_Master() {
     setEditForm({ ...editForm, [name]: value });
   };
 
+  useEffect(() => {
+    axios
+      .get(`${constantApi.baseUrl}/module_master/list`)
+      .then((res) => {
+        console.log(
+          "response is from module master in add submodule master ",
+          res
+        );
+        setModuleMaster(res.data.data);
+      })
+      .catch((err) => {
+        console.error("Error is ", err);
+      });
+  }, []);
+
   const handleEditSubmit = (e) => {
     e.preventDefault();
     setLoader(true);
     axios
       .put(`${constantApi.baseUrl}/sub_module_master/${editId}`, editForm)
       .then((res) => {
+        console.log("response from submodule master ", res, editForm);
+
         setLoader(false);
         alert("Sub Module updated successfully");
         navigate("/sub_module_master");
@@ -59,6 +81,14 @@ function Edit_Sub_Module_Master() {
         alert("Failed to update the module.");
       });
   };
+
+  const handleSelect = (id) => {
+    setModuleId(id);
+    setFormData({
+      ...formData,
+      module_id: id,
+    });
+  };
   return (
     <>
       <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
@@ -68,6 +98,30 @@ function Edit_Sub_Module_Master() {
           </h1>
           <form onSubmit={handleEditSubmit} className="grid grid-cols-2 gap-6">
             {/* Module Name */}
+            {/* Module ID */}
+            <div className="flex flex-col">
+              <label className="text-gray-600 mb-2">Select Module </label>
+              <select
+                onChange={(e) => handleSelect(e.target.value)}
+                name="module_id"
+                id="module_id"
+                // className=" py-2 border-gray-100  "
+                class="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 focus:border-blue-500 hover:bg-gray-100 sm:text-sm"
+              >
+                {/* Default option */}
+                <option value="">Select Module Master ID</option>
+                {moduleMaster.map((moduleData) => (
+                  <option
+                    onClick={() => handleSelect(moduleData.module_id)}
+                    value={moduleData.module_id}
+                    className=" border-gray-100"
+                  >
+                    {moduleData.module_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div className="flex flex-col">
               <label className="text-gray-600 mb-2">Sub Module Name</label>
               <input
