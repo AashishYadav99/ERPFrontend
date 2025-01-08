@@ -91,7 +91,6 @@ function MegaMenu() {
           </button>
         </div>
       </header>
-
       <div className="space-y-4">
         {modules.map((moduleData, index) => (
           <div key={index} className="bg-white rounded-md shadow p-3">
