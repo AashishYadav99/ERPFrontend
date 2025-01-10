@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom"; // For navigation
+import { useNavigate } from "react-router-dom";
 import constantApi from "../../constantApi";
-import Cookies from "js-cookie"; // Import js-cookie
+import Cookies from "js-cookie";
 
 const UserLoginPage = () => {
   const [loginData, setLoginData] = useState({ userId: "", password: "" });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate(); // Initialize navigate for redirection
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,9 +24,7 @@ const UserLoginPage = () => {
     if (!loginData.password) {
       newErrors.password = "Password is required";
     }
-    // else if (loginData.password.length < 8) {
-    //   newErrors.password = "Password must be at least 8 characters long";
-    // }
+
     return newErrors;
   };
 
@@ -48,17 +46,16 @@ const UserLoginPage = () => {
             password: loginData.password,
           }),
         });
-        console.log("response", response);
-
+        console.log("response from Login", response);
         const data = await response.json();
 
         if (response.ok) {
           alert("Login successful!");
           const token = data.data.token;
 
-          Cookies.set("authToken", token, { expires: 7 }); // Expires in 7 days
+          Cookies.set("authToken", token, { expires: 7 });
 
-          // localStorage.setItem("token", data.data.token); // Save token securely
+          localStorage.setItem("token", data.data.token); // Save token securely
           navigate("/module_master"); // Navigate to dashboard
         } else {
           setErrors({ apiError: data.message || "Login failed" });
