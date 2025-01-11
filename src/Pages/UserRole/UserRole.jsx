@@ -105,6 +105,12 @@ function UserRole() {
       };
     });
 
+    axios
+      .post(`${constantApi.baseUrl}/user_role/create`, { data: finalData })
+      .then((res) => {
+        console.log("response---------", res);
+      });
+
     console.log("Submitted Data:", finalData);
   };
 
