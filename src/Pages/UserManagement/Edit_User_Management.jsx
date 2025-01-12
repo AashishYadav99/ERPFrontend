@@ -2,38 +2,36 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import constantApi from "../../constantApi";
-
-function Edit_Module_Master() {
+function Edit_User_Management() {
   const { state } = useLocation();
   const navigate = useNavigate();
-
   const [editForm, setEditForm] = useState({
-    module_name: "",
-    module_description: "",
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone_number: "",
+    organisation: "",
+    location: "",
     status: 1,
-    note1: "",
-    note2: "",
-    sorting_order: "",
-    date1: "",
-    date2: "",
   });
 
   const [editId, setEditId] = useState(null);
   const [loader, setLoader] = useState(false);
 
   useEffect(() => {
-    if (state && state.module) {
-      const module = state.module;
-      setEditId(module.module_id);
+    if (state && state.user_management) {
+      const user = state.user_management;
+      console.log("id is  ", user.id);
+
+      setEditId(user.id);
       setEditForm({
-        module_name: module.module_name,
-        module_description: module.module_description,
-        status: module.status,
-        note1: module.note1,
-        note2: module.note2,
-        sorting_order: module.sorting_order,
-        date1: module.date1,
-        date2: module.date2,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email,
+        phone_number: user.phone_number,
+        organisation: user.organisation,
+        location: user.location,
+        status: user.status,
       });
     }
   }, [state]);
@@ -47,17 +45,16 @@ function Edit_Module_Master() {
     e.preventDefault();
     setLoader(true);
     axios
-      .put(`${constantApi.baseUrl}/module_master/${editId}`, editForm)
-      .then((res) => {
+      .put(`${constantApi.baseUrl}/user_management/${editId}`, editForm)
+      .then(() => {
         setLoader(false);
-        alert("User Management updated successfully");
+        alert("User updated successfully");
         navigate("/user_management");
-        // Redirect or update state as needed
       })
       .catch((err) => {
         setLoader(false);
-        console.error("Error updating module: ", err);
-        alert("Failed to update the module.");
+        console.error("Error updating user: ", err);
+        alert("Failed to update the user.");
       });
   };
 
@@ -65,69 +62,83 @@ function Edit_Module_Master() {
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
       <div className="w-full max-w-4xl bg-white rounded-lg shadow-md p-8">
         <h1 className="text-2xl font-semibold text-gray-700 mb-6">
-          Edit Module Master
+          Edit User Management
         </h1>
         <form onSubmit={handleEditSubmit} className="grid grid-cols-2 gap-6">
-          {/* Module Name */}
+          {/* First Name */}
           <div className="flex flex-col">
-            <label className="text-gray-600 mb-2">Module Name</label>
+            <label className="text-gray-600 mb-2">First Name</label>
             <input
               type="text"
-              name="module_name"
-              value={editForm.module_name}
+              name="first_name"
+              value={editForm.first_name}
               onChange={handleEditChange}
-              placeholder="Enter Module Name"
+              placeholder="Enter First Name"
               className="border border-gray-300 rounded px-4 py-2"
             />
           </div>
 
-          {/* Module Description */}
+          {/* Last Name */}
           <div className="flex flex-col">
-            <label className="text-gray-600 mb-2">Module Description</label>
-            <textarea
-              name="module_description"
-              value={editForm.module_description}
-              onChange={handleEditChange}
-              placeholder="Enter Module Description"
-              className="border border-gray-300 rounded px-4 py-2"
-            />
-          </div>
-
-          {/* Note 1 */}
-          <div className="flex flex-col">
-            <label className="text-gray-600 mb-2">Note 1</label>
+            <label className="text-gray-600 mb-2">Last Name</label>
             <input
               type="text"
-              name="note1"
-              value={editForm.note1}
+              name="last_name"
+              value={editForm.last_name}
               onChange={handleEditChange}
-              placeholder="Enter Note 1"
+              placeholder="Enter Last Name"
               className="border border-gray-300 rounded px-4 py-2"
             />
           </div>
 
-          {/* Note 2 */}
+          {/* Email */}
           <div className="flex flex-col">
-            <label className="text-gray-600 mb-2">Note 2</label>
+            <label className="text-gray-600 mb-2">Email</label>
+            <input
+              type="email"
+              name="email"
+              value={editForm.email}
+              onChange={handleEditChange}
+              placeholder="Enter Email"
+              className="border border-gray-300 rounded px-4 py-2"
+            />
+          </div>
+
+          {/* Phone */}
+          <div className="flex flex-col">
+            <label className="text-gray-600 mb-2">Phone</label>
             <input
               type="text"
-              name="note2"
-              value={editForm.note2}
+              name="phone_number"
+              value={editForm.phone_number}
               onChange={handleEditChange}
-              placeholder="Enter Note 2"
+              placeholder="Enter Phone Number"
               className="border border-gray-300 rounded px-4 py-2"
             />
           </div>
 
-          {/* Sorting Order */}
+          {/* Organisation */}
           <div className="flex flex-col">
-            <label className="text-gray-600 mb-2">Sorting Order</label>
+            <label className="text-gray-600 mb-2">Organisation</label>
             <input
-              type="number"
-              name="sorting_order"
-              value={editForm.sorting_order}
+              type="text"
+              name="organisation"
+              value={editForm.organisation}
               onChange={handleEditChange}
-              placeholder="Enter Sorting Order"
+              placeholder="Enter Organisation"
+              className="border border-gray-300 rounded px-4 py-2"
+            />
+          </div>
+
+          {/* Location */}
+          <div className="flex flex-col">
+            <label className="text-gray-600 mb-2">Location</label>
+            <input
+              type="text"
+              name="location"
+              value={editForm.location}
+              onChange={handleEditChange}
+              placeholder="Enter Location"
               className="border border-gray-300 rounded px-4 py-2"
             />
           </div>
@@ -146,32 +157,8 @@ function Edit_Module_Master() {
             </select>
           </div>
 
-          {/* Date 1 */}
-          <div className="flex flex-col">
-            <label className="text-gray-600 mb-2">Date 1</label>
-            <input
-              type="datetime-local"
-              name="date1"
-              value={editForm.date1}
-              onChange={handleEditChange}
-              className="border border-gray-300 rounded px-4 py-2"
-            />
-          </div>
-
-          {/* Date 2 */}
-          <div className="flex flex-col">
-            <label className="text-gray-600 mb-2">Date 2</label>
-            <input
-              type="datetime-local"
-              name="date2"
-              value={editForm.date2}
-              onChange={handleEditChange}
-              className="border border-gray-300 rounded px-4 py-2"
-            />
-          </div>
-
           {/* Buttons */}
-          <div className="flex justify-end gap-4 mt-8">
+          <div className="flex justify-end gap-4 mt-8 col-span-2">
             <button
               type="submit"
               className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 flex items-center"
@@ -189,4 +176,4 @@ function Edit_Module_Master() {
   );
 }
 
-export default Edit_Module_Master;
+export default Edit_User_Management;

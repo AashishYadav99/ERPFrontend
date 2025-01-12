@@ -21,15 +21,18 @@ import Loader from "./Pages/Loader";
 import Test from "./components/Test";
 import Edit_Module_Master from "./Pages/ModuleMaster/Edit_Module_Master";
 import Edit_Sub_Module_Master from "./Pages/Sub_ModuleMaster/Edit_Sub_Module_Master";
-import UserLoginPage from "./Pages/User/UserLoginPage";
+import UserLoginPage from "./Pages/UserManagement/UserLoginPage";
 import Function_Master from "./Pages/FunctionMaster/Function_Master";
 import Add_Function_Master from "./Pages/FunctionMaster/Add_Function_Master";
 import View_Module_Master from "./Pages/ModuleMaster/View_Module_Master";
 import View_Sub_Module_Master from "./Pages/Sub_ModuleMaster/View_Sub_Module_Master";
 import View_Function_Master from "./Pages/FunctionMaster/View_Function_Master";
 import Edit_Function_Master from "./Pages/FunctionMaster/Edit_Function_Master";
-import User_Management from "./Pages/User/User_Management";
 import UserRole from "./Pages/UserRole/UserRole";
+import User_Management from "./Pages/UserManagement/User_Management";
+import Add_User_Management from "./Pages/UserManagement/Add_User_Management";
+import View_User_Management from "./Pages/UserManagement/View_User_Management";
+import Edit_User_Management from "./Pages/UserManagement/Edit_User_Management";
 
 const Layout = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -115,6 +118,21 @@ function App() {
             path="/view_function_master"
             element={<View_Function_Master />}
           />
+
+          <Route path="/user_management" element={<User_Management />} />
+          <Route
+            path="/add_user_management"
+            element={<Add_User_Management />}
+          />
+          <Route
+            path="/view_user_management"
+            element={<View_User_Management />}
+          />
+          <Route
+            path="/edit_user_management"
+            element={<Edit_User_Management />}
+          />
+
           <Route path="/userrole" element={<UserRole />} />
           <Route path="/warehouse" element={<Warehouse />} />
           <Route path="/addwarehouse" element={<AddWarehouse />} />
@@ -123,7 +141,6 @@ function App() {
           <Route path="/loader" element={<Loader />} />
           <Route path="/test" element={<Test />} />
           <Route path="/userlogin" element={<UserLoginPage />} />
-          <Route path="/user_management" element={<User_Management />} />
           {/* </Route> */}
         </Route>
       </Routes>
