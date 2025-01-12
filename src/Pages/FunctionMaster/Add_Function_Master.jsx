@@ -1,5 +1,7 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
+import CreatableSelect from "react-select/creatable";
+
 import constantApi from "../../constantApi";
 import { useNavigate } from "react-router-dom";
 
@@ -7,18 +9,24 @@ function Add_Function_Master() {
   const [loader, setLoader] = useState(false);
 
   const [moduleMaster, setModuleMaster] = useState([]);
-  const [subModuleMaster, setSubModuleMaster] = useState([]);
   const [functionMaster, setFunctionMaster] = useState([]);
+  const [subModuleMaster, setSubModuleMaster] = useState([]);
   const [filteredSubModules, setFilteredSubModules] = useState([]);
+  const [actionOptions, setActionOptions] = useState([
+    { value: 1, label: "Add" },
+    { value: 2, label: "Edit" },
+    { value: 3, label: "View" },
+  ]); // Default options for multiselect
+  const [selectedActions, setSelectedActions] = useState([
+    { value: 1, label: "Add" },
+    { value: 2, label: "Edit" },
+  ]); // Pre-selected default options
 
   const [moduleId, setModuleId] = useState();
   const navigate = useNavigate();
 
   const currentDate = new Date();
-  const formattedDate = currentDate
-    .toISOString()
-    .slice(0, 19)
-    .replace("T", " ");
+  const formattedDate = currentDate.toISOString().slice(0, 19).replace("T", " ");
 
   const [formData, setFormData] = useState({
     module_id: "",
@@ -66,10 +74,6 @@ function Add_Function_Master() {
     axios
       .get(`${constantApi.baseUrl}/module_master/list`)
       .then((res) => {
-        // console.log(
-        //   "response is from module master in add submodule master ",
-        //   res.data.data
-        // );
         setModuleMaster(res.data.data);
       })
       .catch((err) => {
@@ -81,18 +85,12 @@ function Add_Function_Master() {
     axios
       .get(`${constantApi.baseUrl}/sub_module_master/list`)
       .then((res) => {
-        // console.log(
-        //   "response is from module master in add sub module master ",
-        //   res.data.data
-        // );
         setSubModuleMaster(res.data.data);
       })
       .catch((err) => {
         console.error("Error is ", err);
       });
   }, []);
-
-  // console.log("subModuleMaster", subModuleMaster);
 
   const handleSelect = (id) => {
     setModuleId(id);
@@ -105,6 +103,54 @@ function Add_Function_Master() {
     );
     setFilteredSubModules(filtered);
   };
+
+
+  const handleActionChange = async (selectedActions) => {
+    setSelectedActions(selectedActions);
+  
+    // Check for new actions that aren't in the actionOptions list
+    const newActions = selectedActions.filter(
+      (action) => !actionOptions.some((opt) => opt.value === action.value)
+    );
+  
+    for (const newAction of newActions) {
+      try {
+        // Search if the action exists in the database
+        const searchResponse = await axios.get(
+          `${constantApi.baseUrl}/action_master/search?name=${newAction.label}`
+        );
+  
+        if (searchResponse.data && searchResponse.data.exists) {
+          // If it exists, add it to actionOptions
+          const existingAction = searchResponse.data.action;
+          setActionOptions((prev) => [
+            ...prev,
+            { value: existingAction.action_id, label: existingAction.action_name },
+          ]);
+        } else {
+          // If it doesn't exist, insert it into the database
+          const createResponse = await axios.post(
+            `${constantApi.baseUrl}/action_master/create`,
+            { action_name: newAction.label }
+          );
+  
+          const createdAction = createResponse.data.action;
+          setActionOptions((prev) => [
+            ...prev,
+            { value: createdAction.action_id, label: createdAction.action_name },
+          ]);
+  
+          // Update selected actions with the new action
+          setSelectedActions((prev) => [
+            ...prev.filter((action) => action.value !== newAction.value),
+            { value: createdAction.action_id, label: createdAction.action_name },
+          ]);
+        }
+      } catch (error) {
+        console.error("Error handling new action:", error);
+      }
+    }
+  };  
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
@@ -128,6 +174,7 @@ function Add_Function_Master() {
                   (subModule) =>
                     subModule.module_id === Number(selectedModuleId)
                 );
+                console.log(selectedModuleId);
                 setFilteredSubModules(filtered);
               }}
               name="module_id"
@@ -190,6 +237,22 @@ function Add_Function_Master() {
               placeholder="Enter Sub Module Description"
               className="border border-gray-300 rounded px-4 py-2"
             />
+          </div>
+
+          {/* Function Multiselect */}
+          <div className="flex flex-col col-span-2">
+            <label className="text-gray-600 mb-2">Select Actions</label>
+            <CreatableSelect
+                options={actionOptions}
+                isMulti
+                value={selectedActions}
+                onChange={handleActionChange}
+                placeholder="Search or type to add actions..."
+                className="basic-multi-select"
+                classNamePrefix="select"
+                createOptionPosition="first"
+              />
+
           </div>
 
           {/* note 1  */}
