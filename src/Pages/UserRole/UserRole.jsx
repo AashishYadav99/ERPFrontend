@@ -70,6 +70,59 @@ function UserRole() {
     }));
   };
 
+  // const handleSubmit = () => {
+  //   const finalData = []; // To hold transformed data
+
+  //   // Iterate over modules
+  //   modules.forEach((moduleData) => {
+  //     const { module, submodules } = moduleData;
+
+  //     // Check if submodules exist
+  //     if (Array.isArray(submodules)) {
+  //       submodules.forEach((subModuleData) => {
+  //         const { submodule, functions } = subModuleData;
+
+  //         // Check if functions exist
+  //         if (Array.isArray(functions)) {
+  //           functions.forEach((functionData) => {
+  //             const { function: functionName, actions } = functionData;
+
+  //             console.log("functionData-------", functionData);
+
+  //             // Create a record for each function with its actions
+  //             finalData.push({
+  //               user_id: 1, // Replace with dynamic user ID
+  //               module_name: module,
+  //               sub_module_name: submodule,
+  //               function_name: functionName,
+  //               can_edit: actions.Edit ? 1 : 0,
+  //               can_delete: actions.Delete ? 1 : 0,
+  //               can_view: actions.View ? 1 : 0,
+  //               can_rename: actions.Rename ? 1 : 0,
+  //               // created_by: 1, // Replace with creator's ID
+  //               // updated_by: 1, // Replace with updater's ID
+  //             });
+  //           });
+  //         }
+  //       });
+  //     }
+  //   });
+
+  //   console.log("final data----", finalData);
+
+  //   // Send transformed data to backend
+  //   axios
+  //     .post(`${constantApi.baseUrl}/user_role/create`, finalData)
+  //     .then((res) => {
+  //       console.log("Data submitted successfully:", res);
+  //       alert("Data submitted successfully!");
+  //     })
+  //     .catch((err) => {
+  //       console.error("Error submitting data:", err);
+  //       alert("Failed to submit data. Please try again.");
+  //     });
+  // };
+
   // Handle submit button click
   const handleSubmit = () => {
     const finalData = modules.map((moduleData) => {
@@ -112,6 +165,17 @@ function UserRole() {
       });
 
     console.log("Submitted Data:", finalData);
+    // Send POST request to your backend
+    axios
+      .post(`${constantApi.baseUrl}/user_role/create`, { data: finalData })
+      .then((res) => {
+        console.log("Data submitted successfully:", res.data);
+        alert("Data submitted successfully!");
+      })
+      .catch((err) => {
+        console.error("Error submitting data:", err);
+        alert("Failed to submit data. Please try again.");
+      });
   };
 
   return (
