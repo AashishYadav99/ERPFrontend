@@ -1,13 +1,17 @@
 import axios from "axios";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { FiMoreVertical } from "react-icons/fi";
-import constantApi from "../../constantApi";
-import { CgProfile } from "react-icons/cg";
 import { GiHamburgerMenu } from "react-icons/gi";
+import constantApi from "../../constantApi";
+import { BiSolidEdit } from "react-icons/bi";
+import { MdDeleteOutline, MdSettings } from "react-icons/md";
+import { AiOutlineDoubleRight, AiOutlineEye } from "react-icons/ai";
+import { Link, useNavigate } from "react-router-dom";
+
 function Company() {
   const [companies, setCompanies] = useState([]);
-  const [popoverId, setPopoverId] = useState(null); // Track the currently open popover
-  const popoverRefs = useRef({}); // Ref to store button references for each row
+  const [popoverId, setPopoverId] = useState(null);
+  const [searchInput, setSearchInput] = useState("");
 
   useEffect(() => {
     axios
@@ -16,161 +20,118 @@ function Company() {
         limit: 10,
       })
       .then((res) => {
-        console.log("response is ", res);
+        console.log("response---", res);
 
-        setCompanies(res.data.data.records); // Assuming the structure matches warehouses
+        setCompanies(res.data.data.records);
       })
       .catch((err) => {
-        console.error("Error is ", err);
+        console.error("Error fetching companies:", err);
       });
   }, []);
 
-  const handleActivity = (id) => {
-    setPopoverId(popoverId === id ? null : id); // Toggle popover visibility
-  };
+  const handleActivity = (id) => setPopoverId(popoverId === id ? null : id);
+
+  // const filteredCompanies = companies.filter((company) =>
+  //   company.ccompany.toLowerCase().includes(searchInput.toLowerCase())
+  // );
 
   return (
-    <>
-      {/* Table header */}
-      <div className="py-4 px-4">
-        <div className="flex justify-between items-center">
-          <div className="flex  gap-8 items-center text-black">
-            <div>
-              <CgProfile className="text-black font-bold text-2xl" />
-            </div>
-            <div>
-              <span className="font-bold text-xl">Warehouse</span>
-            </div>
-          </div>
-          <div className="flex  gap-8 items-center text-black">
-            <div>
-              <button className="py-2 bg-gray-300  rounded-lg px-4 text-black font-bold">
-                + New
-              </button>
-            </div>
-            <div>
-              <GiHamburgerMenu className="text-black font-bold text-2xl" />
-            </div>
+    <div className="max-w-7xl mx-auto p-4 bg-gray-100 min-h-screen">
+      {/* Header */}
+      <header className="flex justify-between items-center mb-6">
+        <div className="flex items-center gap-3">
+          <AiOutlineDoubleRight
+            className="text-gray-600 text-xl cursor-pointer"
+            onClick={() => navigate(-1)}
+            title="Back"
+          />
+          <MdSettings className="text-blue-600 text-3xl" />
+          <h1 className="text-xl font-semibold text-gray-700">Module Master</h1>
+        </div>
+        <div className="flex items-center gap-4">
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="w-64 px-3 py-2 border rounded-lg text-gray-700 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Search by Name"
+          />
+          <Link to="/add_company">
+            <button className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition">
+              + New
+            </button>
+          </Link>
+          <div className="relative">
+            <GiHamburgerMenu
+              className="text-gray-700 text-2xl cursor-pointer hover:text-gray-900"
+              onClick={() => setPopoverId((prev) => !prev)}
+            />
+            {popoverId && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-md border border-gray-200 z-10">
+                <ul>
+                  <li className="hover:bg-gray-100 px-4 py-2 cursor-pointer">
+                    Import
+                  </li>
+                  <li className="hover:bg-gray-100 px-4 py-2 cursor-pointer">
+                    Export
+                  </li>
+                </ul>
+              </div>
+            )}
           </div>
         </div>
+      </header>
 
-        <div>
-          <form className=" flex justify-end my-8">
-            <div className="relative">
-              <input
-                type="search"
-                id="default-search"
-                className="block w-full p-3 ps-4 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="Search"
-                required
-              />
-            </div>
-          </form>
-        </div>
-      </div>
-      {/* table body */}
-
-      <table className="w-full text-gray-500 dark:text-gray-400">
-        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-          <tr className="text-center">
-            <th scope="col" className="px-2 py-3">
-              <input
-                checked
-                id="checked-checkbox"
-                type="checkbox"
-                value=""
-                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-              />
-            </th>
-            <th scope="col" className="px-2 py-3">
-              DATE
-            </th>
-            <th scope="col" className="px-2 py-3">
-              TAX NO
-            </th>
-            <th scope="col" className="px-2 py-3">
-              Description
-            </th>
-            <th scope="col" className="px-2 py-3">
-              LICENSE NO
-            </th>
-            <th scope="col" className="px-2 py-3">
-              STATUS
-            </th>
-            <th scope="col" className="px-2 py-3">
-              ACTION
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {companies.length > 0 ? (
-            companies.map((company) => (
-              <tr
-                key={company.id}
-                className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 text-center"
-              >
-                <td className="px-2 py-4">
-                  <input
-                    checked
-                    id="checked-checkbox"
-                    type="checkbox"
-                    value=""
-                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                  />
-                </td>
-                <td className="px-2 py-4">
-                  {new Date(company.created_at).toLocaleDateString("en-GB")}
-                </td>
-                <td className="px-2 py-4">{company.ctaxnumber}</td>
-                <td className="px-2 py-4">{company.compdesc}</td>
-                <td className="px-2 py-4">{company.clicense}</td>
-                <td className="px-2 py-4">
-                  {company.status === 1 ? "Active" : "Inactive"}
-                </td>
-                <td className="px-6 py-4 text-center">
-                  <FiMoreVertical
-                    ref={(el) => (popoverRefs.current[company.id] = el)} // Store the reference to the button
-                    onClick={() => handleActivity(company.id)} // Trigger popover visibility toggle
-                    className="flex justify-center"
-                  />
-
-                  {popoverId === company.id && (
-                    <div
-                      data-popover
-                      role="tooltip"
-                      className="absolute inline-block w-32 text-sm text-gray-500 transition-opacity duration-300 bg-white border border-gray-200 rounded-lg shadow-sm opacity-100 dark:text-gray-400 dark:border-gray-600 dark:bg-gray-800"
-                      style={{
-                        top: `${
-                          popoverRefs.current[company.id]?.offsetHeight
-                        }px`, // Position below the button
-                        right: "0",
-                        transform: "translateY(10px)", // Optional: slight offset
-                      }}
-                    >
-                      <div className="px-3 py-2 bg-gray-100 border-b border-gray-200 rounded-t-lg dark:border-gray-600 dark:bg-gray-700">
-                        <h3 className="font-semibold text-gray-900 dark:text-white">
-                          Edit
-                        </h3>
-                      </div>
-                      <div className="px-3 py-2">
-                        <p className="font-bold text-black">Delete</p>
-                      </div>
-                      <div data-popper-arrow></div>
-                    </div>
-                  )}
+      {/* Table */}
+      <div className="bg-white rounded-lg shadow-md p-4">
+        <table className="w-full text-sm text-left text-gray-600">
+          <thead className="text-gray-700 bg-gray-100">
+            <tr>
+              <th className="p-4">Organisation</th>
+              <th className="p-4">Description</th>
+              <th className="p-4">Status</th>
+              <th className="p-4">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {companies.length > 0 ? (
+              companies.map((company) => (
+                <tr key={company.id} className="border-b">
+                  <td className="p-4">{company.ccompany}</td>
+                  <td className="p-4">{company.compdesc}</td>
+                  <td className="p-4">
+                    {company.status === 1 ? "Active" : "Inactive"}
+                  </td>
+                  <td className="p-4 flex gap-2 leading-tight">
+                    <BiSolidEdit
+                      className="text-blue-600 cursor-pointer hover:text-blue-800"
+                      onClick={() => handleEditActivity(data.module_id)}
+                      title="Edit"
+                    />
+                    <MdDeleteOutline
+                      className="text-red-600 cursor-pointer hover:text-red-800"
+                      onClick={() => deleteModule(data.module_id)}
+                      title="Delete"
+                    />
+                    <AiOutlineEye
+                      className="text-green-600 cursor-pointer hover:text-green-800"
+                      onClick={() => handleViewActivity(data.module_id)}
+                      title="View"
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="4" className="text-center py-4">
+                  No companies found.
                 </td>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="5" className="px-6 py-4 text-center">
-                No companies found
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
 

@@ -33,6 +33,8 @@ import User_Management from "./Pages/UserManagement/User_Management";
 import Add_User_Management from "./Pages/UserManagement/Add_User_Management";
 import View_User_Management from "./Pages/UserManagement/View_User_Management";
 import Edit_User_Management from "./Pages/UserManagement/Edit_User_Management";
+import Add_Company from "./Pages/Company/Add_Company";
+import Add_Location from "./Pages/Location/Add_Location";
 
 const Layout = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -137,7 +139,9 @@ function App() {
           <Route path="/warehouse" element={<Warehouse />} />
           <Route path="/addwarehouse" element={<AddWarehouse />} />
           <Route path="/company" element={<Company />} />
+          <Route path="/add_company" element={<Add_Company />} />
           <Route path="/location" element={<Location />} />
+          <Route path="/add_location" element={<Add_Location />} />
           <Route path="/loader" element={<Loader />} />
           <Route path="/test" element={<Test />} />
           <Route path="/userlogin" element={<UserLoginPage />} />

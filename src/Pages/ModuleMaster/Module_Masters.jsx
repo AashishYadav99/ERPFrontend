@@ -33,7 +33,9 @@ const Module_Masters = () => {
   const deleteModule = (id) => {
     axios
       .delete(`${constantApi.baseUrl}/module_master/${id}`)
-      .then(() => setModuleMaster((prev) => prev.filter((data) => data.module_id !== id)))
+      .then(() =>
+        setModuleMaster((prev) => prev.filter((data) => data.module_id !== id))
+      )
       .catch((err) => alert("Failed to delete the module."));
   };
 
@@ -74,8 +76,12 @@ const Module_Masters = () => {
             {popoverId && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-md border border-gray-200 z-10">
                 <ul>
-                  <li className="hover:bg-gray-100 px-4 py-2 cursor-pointer">Import</li>
-                  <li className="hover:bg-gray-100 px-4 py-2 cursor-pointer">Export</li>
+                  <li className="hover:bg-gray-100 px-4 py-2 cursor-pointer">
+                    Import
+                  </li>
+                  <li className="hover:bg-gray-100 px-4 py-2 cursor-pointer">
+                    Export
+                  </li>
                 </ul>
               </div>
             )}
@@ -102,7 +108,9 @@ const Module_Masters = () => {
                 <td className="p-4 leading-tight">{data.module_description}</td>
                 <td className="p-4 leading-tight">{data.note1}</td>
                 <td className="p-4 leading-tight">{data.note2}</td>
-                <td className="p-4 leading-tight">{data.status === 1 ? "Active" : "Inactive"}</td>
+                <td className="p-4 leading-tight">
+                  {data.status === 1 ? "Active" : "Inactive"}
+                </td>
                 <td className="p-4 flex gap-2 leading-tight">
                   <BiSolidEdit
                     className="text-blue-600 cursor-pointer hover:text-blue-800"

@@ -4,6 +4,7 @@ import { FiMoreVertical } from "react-icons/fi";
 import { CgProfile } from "react-icons/cg";
 import { GiHamburgerMenu } from "react-icons/gi";
 import constantApi from "../../constantApi";
+import { Link } from "react-router-dom";
 function Location() {
   const [location, setLocation] = useState([]);
   const [popoverId, setPopoverId] = useState(null); // Track the currently open popover
@@ -43,9 +44,11 @@ function Location() {
           </div>
           <div className="flex  gap-8 items-center text-black">
             <div>
-              <button className="py-2 bg-gray-300  rounded-lg px-4 text-black font-bold">
-                + New
-              </button>
+              <Link to="/add_location">
+                <button className="py-2 bg-gray-300  rounded-lg px-4 text-black font-bold">
+                  + New
+                </button>
+              </Link>
             </div>
             <div>
               <GiHamburgerMenu className="text-black font-bold text-2xl" />
@@ -73,34 +76,17 @@ function Location() {
         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
           <tr className="text-center">
             <th scope="col" className="px-2 py-3">
-              <input
-                checked
-                id="checked-checkbox"
-                type="checkbox"
-                value=""
-                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-              />
+              Company Name
             </th>
             <th scope="col" className="px-2 py-3">
-              DATE
+              Company Location
+            </th>
+
+            <th scope="col" className="px-2 py-3">
+              Status
             </th>
             <th scope="col" className="px-2 py-3">
-              COMPANY NAME
-            </th>
-            <th scope="col" className="px-2 py-3">
-              TAX NO
-            </th>
-            <th scope="col" className="px-2 py-3">
-              DESCRIPTION
-            </th>
-            <th scope="col" className="px-2 py-3">
-              LICENSE NO
-            </th>
-            <th scope="col" className="px-2 py-3">
-              STATUS
-            </th>
-            <th scope="col" className="px-2 py-3">
-              ACTION
+              Action
             </th>
           </tr>
         </thead>
@@ -111,22 +97,11 @@ function Location() {
                 key={location.id}
                 className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 text-center"
               >
-                <td className="px-2 py-4">
-                  <input
-                    checked
-                    id="checked-checkbox"
-                    type="checkbox"
-                    value=""
-                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                  />
-                </td>
-                <td className="px-2 py-4">
-                  {new Date(locatData.created_at).toLocaleDateString("en-GB")}
-                </td>
                 <td className="px-2 py-4">{locatData.ccompany}</td>
-                <td className="px-2 py-4">{locatData.ctaxnumber}</td>
-                <td className="px-2 py-4">{locatData.compdesc}</td>
-                <td className="px-2 py-4">{locatData.clicense}</td>
+                <th scope="col" className="px-2 py-3">
+                  {locatData.locname}
+                </th>
+
                 <td className="px-2 py-4">
                   {locatData.status === 1 ? "Active" : "Inactive"}
                 </td>
