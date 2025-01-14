@@ -13,8 +13,10 @@ function UserRole() {
   const [roles, setRoles] = useState([]); // State for roles
   const [selectedLocation, setSelectedLocation] = useState(""); // Selected location
   const [selectedRole, setSelectedRole] = useState(""); // Selected role
+  const [actionMaster, setActionMaster] = useState([]); // Action Master Data
+  const [functionActionMap, setFunctionActionMap] = useState([]); // Function-Action Mapping Data
 
-  // Fetch modules, submodules, functions, locations, and roles
+  // Fetch modules, submodules, functions, action master, locations, and roles
   useEffect(() => {
     axios
       .get(`${constantApi.baseUrl}/module_master/list`)
@@ -44,20 +46,47 @@ function UserRole() {
         setFunction_master(functions);
         const initialState = {};
         functions.forEach((func) => {
-          initialState[func.function_master_id] = {
-            Edit: false,
-            Delete: false,
-            View: false,
-            Rename: false,
-          };
+          initialState[func.function_master_id] = {};
         });
         setCheckboxState(initialState);
       })
       .catch((err) => console.error("Error fetching function master:", err));
 
+    axios
+      .get(`${constantApi.baseUrl}/action_master/list`)
+      .then((res) => {
+        setActionMaster(res.data.data)
+      })
+      .catch((err) => console.error("Error fetching action master:", err));
+
+    // Fetching the function-action mapping table
+    axios
+      .get(`${constantApi.baseUrl}/function_action_master_map/list`)
+      .then((res) => {
+        setFunctionActionMap(res.data.data)
+        console.log(res.data.data)
+      })
+      .catch((err) => console.error("Error fetching function-action mapping:", err));
+
     // Example locations and roles, replace with API calls if necessary
     setLocations(["Location 1", "Location 2", "Location 3"]);
-    setRoles(["Admin", "Editor", "Viewer"]);
+    setRoles([
+      "System Administrator",
+      "Superuser",
+      "Business Administrator",
+      "Finance Manager",
+      "HR Manager",
+      "Warehouse Manager",
+      "Procurement Manager",
+      "Sales Manager",
+      "Production Manager",
+      "Quality Control Manager",
+      "Supply Chain Manager",
+      "Project Manager",
+      "End Users",
+      "Reports User",
+      "Security Administrator",
+    ]);
   }, []);
 
   // Handle search input
@@ -79,6 +108,7 @@ function UserRole() {
     );
   });
 
+  // Handle action change
   const handleActionChange = (functionId, action) => {
     setCheckboxState((prevState) => ({
       ...prevState,
@@ -89,53 +119,40 @@ function UserRole() {
     }));
   };
 
+  // Handle submit data
   const handleSubmit = () => {
     const finalData = [];
-  
+
     modules.forEach((moduleData) => {
       const subModules = filteredSubModules[moduleData.module_id] || [];
-  
-      // If there are no submodules, we still need to include a "null" entry.
-      if (subModules.length === 0) {
-        finalData.push({
-          module: moduleData.module_name,
-          submodule: null,
-          function: null,
-          actions: null,
-        });
-      }
-  
+
       subModules.forEach((subModuleData) => {
         const functions = function_master.filter(
           (func) => func.sub_module_id === subModuleData.sub_module_id
         );
-  
-        // If there are no functions for the submodule, we add a "null" function and actions.
-        if (functions.length === 0) {
+
+        functions.forEach((func) => {
+          const actionsForFunction = functionActionMap
+            .filter((map) => map.function_master_id === func.function_master_id)
+            .map((map) => map.action_id);
+
+          const actions = actionMaster
+            .filter((action) => actionsForFunction.includes(action.action_id))
+            .reduce((acc, action) => {
+              acc[action.action_name] = checkboxState[func.function_master_id]?.[action.action_name] || false;
+              return acc;
+            }, {});
+
           finalData.push({
             module: moduleData.module_name,
             submodule: subModuleData.sub_module_name,
-            function: null,
-            actions: null,
+            function: func.function_master_name,
+            actions,
           });
-        } else {
-          functions.forEach((func) => {
-            finalData.push({
-              module: moduleData.module_name,
-              submodule: subModuleData.sub_module_name,
-              function: func.function_master_name,
-              actions: {
-                Edit: checkboxState[func.function_master_id]?.Edit || false,
-                Delete: checkboxState[func.function_master_id]?.Delete || false,
-                View: checkboxState[func.function_master_id]?.View || false,
-                Rename: checkboxState[func.function_master_id]?.Rename || false,
-              },
-            });
-          });
-        }
+        });
       });
     });
-  
+
     // Now submit the final data
     axios
       .post(`${constantApi.baseUrl}/user_role/create`, { data: finalData })
@@ -144,19 +161,17 @@ function UserRole() {
         alert("Data submitted successfully!");
       })
       .catch((err) => {
-        
-        console.log(finalData);
         console.error("Error submitting data:", err);
         alert("Failed to submit data. Please try again.");
       });
-  };  
+  };
 
   return (
     <div className="px-4 py-6 bg-white text-gray-800 shadow-lg rounded-lg max-w-7xl mx-auto overflow-x-auto">
       <h6 className="text-2xl font-semibold mb-6">
         Assign Roles, Permissions, and Actions to User Groups
       </h6>
-      
+
       {/* Location and Role Dropdowns */}
       <div className="mb-6 flex space-x-6">
         <div className="w-1/3">
@@ -226,72 +241,48 @@ function UserRole() {
         <tbody className="text-sm text-gray-700">
           {filteredData.map((moduleData, index) => {
             const subModules = filteredSubModules[moduleData.module_id] || [];
-            if (subModules.length === 0) {
-              return (
-                <tr key={index} className="bg-gray-100">
-                  <td className="px-3 py-1 border">{moduleData.module_name}</td>
-                  <td className="px-3 py-1 border">No Submodule</td>
-                  <td className="px-3 py-1 border">No Function</td>
-                  <td className="px-3 py-1 border">-</td>
-                </tr>
-              );
-            }
             return subModules.map((subModuleData, subIndex) => {
               const functions = function_master.filter(
                 (func) => func.sub_module_id === subModuleData.sub_module_id
               );
-              if (functions.length === 0) {
+              return functions.map((func, funcIndex) => {
+                const actionsForFunction = functionActionMap
+                  .filter((map) => map.function_master_id === func.function_master_id)
+                  .map((map) => map.action_id);
+
                 return (
-                  <tr key={`${index}-${subIndex}`} className="bg-gray-100">
-                    <td className="px-3 py-1 border">{moduleData.module_name}</td>
-                    <td className="px-3 py-1 border">{subModuleData.sub_module_name}</td>
-                    <td className="px-3 py-1 border">No Function</td>
-                    <td className="px-3 py-1 border">-</td>
+                  <tr key={`${index}-${subIndex}-${funcIndex}`} className="hover:bg-gray-50">
+                    {funcIndex === 0 && (
+                      <td rowSpan={functions.length} className="px-3 py-1 border bg-blue-100">
+                        {moduleData.module_name}
+                      </td>
+                    )}
+                    {funcIndex === 0 && (
+                      <td rowSpan={functions.length} className="px-3 py-1 border bg-green-100">
+                        {subModuleData.sub_module_name}
+                      </td>
+                    )}
+                    <td className="px-3 py-1 border bg-yellow-100">
+                      {func.function_master_name}
+                    </td>
+                    <td className="px-3 py-1 border">
+                      {actionMaster
+                        .filter((action) => actionsForFunction.includes(action.action_id))
+                        .map((action) => (
+                          <label key={action.action_id} className="inline-flex items-center mr-2 text-sm">
+                            <input
+                              type="checkbox"
+                              checked={checkboxState[func.function_master_id]?.[action.action_name] || false}
+                              onChange={() => handleActionChange(func.function_master_id, action.action_name)}
+                              className="mr-2"
+                            />
+                            {action.action_name}
+                          </label>
+                        ))}
+                    </td>
                   </tr>
                 );
-              }
-              return functions.map((func, funcIndex) => (
-                <tr
-                  key={`${index}-${subIndex}-${funcIndex}`}
-                  className="hover:bg-gray-50"
-                >
-                  {funcIndex === 0 && (
-                    <td
-                      rowSpan={functions.length}
-                      className="px-3 py-1 border bg-blue-100"
-                    >
-                      {moduleData.module_name}
-                    </td>
-                  )}
-                  {funcIndex === 0 && (
-                    <td
-                      rowSpan={functions.length}
-                      className="px-3 py-1 border bg-green-100"
-                    >
-                      {subModuleData.sub_module_name}
-                    </td>
-                  )}
-                  <td className="px-3 py-1 border bg-yellow-100">
-                    {func.function_master_name}
-                  </td>
-                  <td className="px-3 py-1 border">
-                    {["Edit", "Delete", "View", "Rename"].map((action) => (
-                      <label
-                        key={action}
-                        className="inline-flex items-center mr-2 text-sm"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={checkboxState[func.function_master_id]?.[action] || false}
-                          onChange={() => handleActionChange(func.function_master_id, action)}
-                          className="mr-2"
-                        />
-                        {action}
-                      </label>
-                    ))}
-                  </td>
-                </tr>
-              ));
+              });
             });
           })}
         </tbody>
