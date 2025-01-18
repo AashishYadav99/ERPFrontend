@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import CreatableSelect from "react-select/creatable";
 import axios from "axios";
 import constantApi from "../../constantApi";
 
@@ -8,23 +9,22 @@ function UserRole() {
   const [function_master, setFunction_master] = useState([]);
   const [filteredSubModules, setFilteredSubModules] = useState({});
   const [checkboxState, setCheckboxState] = useState({});
-  const [searchQuery, setSearchQuery] = useState(""); // State for search input
-  const [locations, setLocations] = useState([]); // State for locations
-  const [roles, setRoles] = useState([]); // State for roles
-  const [selectedLocation, setSelectedLocation] = useState(""); // Selected location
-  const [selectedRole, setSelectedRole] = useState(""); // Selected role
-  const [actionMaster, setActionMaster] = useState([]); // Action Master Data
-  const [functionActionMap, setFunctionActionMap] = useState([]); // Function-Action Mapping Data
+  const [searchQuery, setSearchQuery] = useState(""); 
+  const [locations, setLocations] = useState([]); 
+  const [roles, setRoles] = useState([]); 
+  const [selectedLocation, setSelectedLocation] = useState(""); 
+  const [selectedRoles, setSelectedRoles] = useState(); 
+  const [actionMaster, setActionMaster] = useState([]); 
+  const [functionActionMap, setFunctionActionMap] = useState([]); 
+  const [existingPermissions, setExistingPermissions] = useState([]); // Step 1: Store existing permissions
 
-  // Fetch modules, submodules, functions, action master, locations, and roles
   useEffect(() => {
-    axios
-      .get(`${constantApi.baseUrl}/module_master/list`)
+    // Fetching all data like modules, sub-modules, function masters, etc.
+    axios.get(`${constantApi.baseUrl}/module_master/list`)
       .then((res) => setModules(res.data.data))
       .catch((err) => console.error("Error fetching modules:", err));
 
-    axios
-      .get(`${constantApi.baseUrl}/sub_module_master/list`)
+    axios.get(`${constantApi.baseUrl}/sub_module_master/list`)
       .then((res) => {
         const subModules = res.data.data;
         setSub_Modules(subModules);
@@ -39,8 +39,7 @@ function UserRole() {
       })
       .catch((err) => console.error("Error fetching submodules:", err));
 
-    axios
-      .get(`${constantApi.baseUrl}/function_master/list`)
+    axios.get(`${constantApi.baseUrl}/function_master/list`)
       .then((res) => {
         const functions = res.data.data;
         setFunction_master(functions);
@@ -52,171 +51,167 @@ function UserRole() {
       })
       .catch((err) => console.error("Error fetching function master:", err));
 
-    axios
-      .get(`${constantApi.baseUrl}/action_master/list`)
-      .then((res) => {
-        setActionMaster(res.data.data)
-      })
+    axios.get(`${constantApi.baseUrl}/action_master/list`)
+      .then((res) => setActionMaster(res.data.data))
       .catch((err) => console.error("Error fetching action master:", err));
 
-    // Fetching the function-action mapping table
-    axios
-      .get(`${constantApi.baseUrl}/function_action_master_map/list`)
-      .then((res) => {
-        setFunctionActionMap(res.data.data)
-        console.log(res.data.data)
-      })
+    axios.get(`${constantApi.baseUrl}/function_action_master_map/list`)
+      .then((res) => setFunctionActionMap(res.data.data))
       .catch((err) => console.error("Error fetching function-action mapping:", err));
 
-    // Example locations and roles, replace with API calls if necessary
-    setLocations(["Location 1", "Location 2", "Location 3"]);
     setRoles([
-      "System Administrator",
-      "Superuser",
-      "Business Administrator",
-      "Finance Manager",
-      "HR Manager",
-      "Warehouse Manager",
-      "Procurement Manager",
-      "Sales Manager",
-      "Production Manager",
-      "Quality Control Manager",
-      "Supply Chain Manager",
-      "Project Manager",
-      "End Users",
-      "Reports User",
-      "Security Administrator",
+      { value: 1, label: "System Administrator" },
+      { value: 2, label: "Superuser" },
+      { value: 3, label: "Business Administrator" },
+      { value: 4, label: "Finance Manager" },
+      { value: 5, label: "HR Manager" },
+      { value: 6, label: "Warehouse Manager" },
+      { value: 7, label: "Procurement Manager" },
+      { value: 8, label: "Sales Manager" },
+      { value: 9, label: "Production Manager" },
+      { value: 10, label: "Quality Control Manager" },
+      { value: 11, label: "Supply Chain Manager" },
+      { value: 12, label: "Project Manager" },
+      { value: 13, label: "End Users" },
+      { value: 14, label: "Reports User" },
+      { value: 15, label: "Security Administrator" },
     ]);
   }, []);
 
-  // Handle search input
-  const handleSearch = (event) => {
-    setSearchQuery(event.target.value);
-  };
+  useEffect(() => {
+    console.log(selectedRoles);
+    // Fetch existing permissions when roles are selected
+    if (selectedRoles) {
+      const roleId = selectedRoles.value; // Assuming selectedRole is an object with a 'value' field
+      const url = `${constantApi.baseUrl}/user_group/permissions/${roleId}`;  // Sending single role_id
+      axios.get(url)
+        .then((res) => {
+          setExistingPermissions(res.data.data); // Store existing permissions
+          const updatedCheckboxState = { ...checkboxState };
 
-  // Filter table data based on search query
-  const filteredData = modules.filter((module) => {
-    return (
-      module.module_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      sub_modules
-        .filter((subModule) => subModule.module_id === module.module_id)
-        .some((subModule) =>
-          subModule.sub_module_name
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase())
-        )
-    );
-  });
+          // Pre-check checkboxes based on existing permissions
+          res.data.data.forEach(permission => {
+            const { function_master_id, action_id } = permission;
+            const actionName = actionMaster.find(action => action.action_id === action_id)?.action_name;
 
-  // Handle action change
+            if (actionName) {
+              updatedCheckboxState[function_master_id] = {
+                ...updatedCheckboxState[function_master_id],
+                [actionName]: 1, // Mark checkbox as checked
+              };
+            }
+          });
+
+          setCheckboxState(updatedCheckboxState); // Update checkbox state
+        })
+        .catch((err) => console.error("Error fetching existing permissions:", err));
+    }
+  }, [selectedRoles, actionMaster, checkboxState]);
+
+  const handleSearch = (event) => setSearchQuery(event.target.value);
+
   const handleActionChange = (functionId, action) => {
     setCheckboxState((prevState) => ({
       ...prevState,
       [functionId]: {
         ...prevState[functionId],
-        [action]: !prevState[functionId][action],
+        [action]: prevState[functionId]?.[action] === 1 ? 0 : 1, // Toggle between 1 and 0
       },
     }));
   };
 
-  // Handle submit data
+  const handleRoleChange = (selectedOptions) => setSelectedRoles(selectedOptions || []);
+
   const handleSubmit = () => {
     const finalData = [];
-
+  
     modules.forEach((moduleData) => {
       const subModules = filteredSubModules[moduleData.module_id] || [];
-
+  
       subModules.forEach((subModuleData) => {
         const functions = function_master.filter(
           (func) => func.sub_module_id === subModuleData.sub_module_id
         );
-
+  
         functions.forEach((func) => {
           const actionsForFunction = functionActionMap
             .filter((map) => map.function_master_id === func.function_master_id)
             .map((map) => map.action_id);
-
+  
+          // Gather all selected actions for the function
           const actions = actionMaster
             .filter((action) => actionsForFunction.includes(action.action_id))
             .reduce((acc, action) => {
-              acc[action.action_name] = checkboxState[func.function_master_id]?.[action.action_name] || false;
+              const actionValue = checkboxState[func.function_master_id]?.[action.action_name] || 0;
+  
+              if (actionValue === 1) {
+                acc.push(action.action_id); // Add the selected action_id to the list
+              }
               return acc;
-            }, {});
-
-          finalData.push({
-            module: moduleData.module_name,
-            submodule: subModuleData.sub_module_name,
-            function: func.function_master_name,
-            actions,
+            }, []);
+  
+          // If actions are selected, push multiple rows
+          actions.forEach((actionId) => {
+            selectedRoles.forEach((role) => {
+              // Prevent duplicate submissions for same role and action
+              if (!existingPermissions.some(permission => permission.role_id === role.value && permission.action_id === actionId)) {
+                finalData.push({
+                  module_id: moduleData.module_id,
+                  sub_module_id: subModuleData.sub_module_id,
+                  function_master_id: func.function_master_id,
+                  role_id: role.value, // Role ID
+                  action_id: actionId,  // Specific action_id for the row
+                });
+              }
+            });
           });
         });
       });
     });
-
-    // Now submit the final data
-    axios
-      .post(`${constantApi.baseUrl}/user_role/create`, { data: finalData })
-      .then((res) => {
-        console.log("Data submitted successfully:", res.data);
-        alert("Data submitted successfully!");
-      })
-      .catch((err) => {
-        console.error("Error submitting data:", err);
-        alert("Failed to submit data. Please try again.");
-      });
+  
+    // Submit the final data only if there is data to submit
+    if (finalData.length > 0) {
+      axios
+        .post(`${constantApi.baseUrl}/user_group/bulk`, { data: finalData }, {
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        })
+        .then((res) => {
+          console.log("Data submitted successfully:", res.data);
+          alert("Data submitted successfully!");
+        })
+        .catch((err) => {
+          console.error("Data submission failed:", err);
+          alert("Data failed. Please check.");
+        });
+    } else {
+      alert("No actions selected. Please select at least one action.");
+    }
   };
-
+  
   return (
     <div className="px-4 py-6 bg-white text-gray-800 shadow-lg rounded-lg max-w-7xl mx-auto overflow-x-auto">
-      <h6 className="text-2xl font-semibold mb-6">
-        Assign Roles, Permissions, and Actions to User Groups
-      </h6>
-
-      {/* Location and Role Dropdowns */}
+      <h6 className="text-2xl font-semibold mb-6">Assign Roles, Permissions, and Actions to User Groups</h6>
+      
+      {/* Role Dropdown */}
       <div className="mb-6 flex space-x-6">
         <div className="w-1/3">
-          <label htmlFor="location" className="block text-sm font-medium mb-2">
-            Location
-          </label>
-          <select
-            id="location"
-            className="w-full p-2 text-sm border rounded-lg"
-            value={selectedLocation}
-            onChange={(e) => setSelectedLocation(e.target.value)}
-          >
-            <option value="">Select Location</option>
-            {locations.map((location, index) => (
-              <option key={index} value={location}>
-                {location}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="w-1/3">
-          <label htmlFor="role" className="block text-sm font-medium mb-2">
-            Role
-          </label>
-          <select
-            id="role"
-            className="w-full p-2 text-sm border rounded-lg"
-            value={selectedRole}
-            onChange={(e) => setSelectedRole(e.target.value)}
-          >
-            <option value="">Select Role</option>
-            {roles.map((role, index) => (
-              <option key={index} value={role}>
-                {role}
-              </option>
-            ))}
-          </select>
+          <label htmlFor="roles" className="block text-sm font-medium mb-2">Role</label>
+          <CreatableSelect
+            id="roles"
+            options={roles}
+            value={selectedRoles}
+            onChange={handleRoleChange}
+            className="basic-multi-select w-full"
+            classNamePrefix="select"
+            placeholder="Select Role"
+          />
         </div>
 
         {/* Search Box */}
         <div className="w-1/3">
-          <label htmlFor="search" className="block text-sm font-medium mb-2">
-            Search
-          </label>
+          <label htmlFor="search" className="block text-sm font-medium mb-2">Search</label>
           <input
             id="search"
             type="text"
@@ -228,7 +223,7 @@ function UserRole() {
         </div>
       </div>
 
-      {/* Table with sticky header */}
+      {/* Table with Permissions */}
       <table className="w-full table-auto border-separate border-spacing-0">
         <thead className="bg-gray-200 text-sm text-gray-600 sticky top-0">
           <tr>
@@ -239,7 +234,7 @@ function UserRole() {
           </tr>
         </thead>
         <tbody className="text-sm text-gray-700">
-          {filteredData.map((moduleData, index) => {
+          {modules.map((moduleData, index) => {
             const subModules = filteredSubModules[moduleData.module_id] || [];
             return subModules.map((subModuleData, subIndex) => {
               const functions = function_master.filter(
@@ -272,7 +267,7 @@ function UserRole() {
                           <label key={action.action_id} className="inline-flex items-center mr-2 text-sm">
                             <input
                               type="checkbox"
-                              checked={checkboxState[func.function_master_id]?.[action.action_name] || false}
+                              checked={checkboxState[func.function_master_id]?.[action.action_name] === 1}
                               onChange={() => handleActionChange(func.function_master_id, action.action_name)}
                               className="mr-2"
                             />
