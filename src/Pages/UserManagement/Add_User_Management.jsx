@@ -7,24 +7,6 @@ import { MdSettings } from "react-icons/md";
 import { GiHamburgerMenu } from "react-icons/gi";
 import Pagination from "../Pagination";
 
-const roles = [
-  "System Administrator",
-  "Superuser",
-  "Business Administrator",
-  "Finance Manager",
-  "HR Manager",
-  "Warehouse Manager",
-  "Procurement Manager",
-  "Sales Manager",
-  "Production Manager",
-  "Quality Control Manager",
-  "Supply Chain Manager",
-  "Project Manager",
-  "End Users",
-  "Reports User",
-  "Security Administrator",
-];
-
 const User_Management = () => {
   const [loader, setLoader] = useState(false);
   const [popoverId, setPopoverId] = useState(null);
@@ -33,33 +15,81 @@ const User_Management = () => {
 
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
+  const [headerInfo, setHeaderInfo] = useState({
     first_name: "",
     last_name: "",
-    email: "",
     country_code: "",
     phone_number: "",
-    location: "",
-    organisation: "",
-    role: "",
+    email: "",
+    rows: [
+      {
+        country: "",
+        organization: "",
+        location: "",
+        role: "",
+        // selected: false,
+      },
+    ],
   });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+  // Dropdown options
+  const countryOptions = ["Country 1", "Country 2"];
+  const organizationOptions = ["Organization 1", "Organization 2"];
+  const locationOptions = ["Location 1", "Location 2"];
+  const roles = [
+    "System Administrator",
+    "Superuser",
+    "Business Administrator",
+    "Finance Manager",
+    "HR Manager",
+    "Warehouse Manager",
+    "Procurement Manager",
+    "Sales Manager",
+    "Production Manager",
+    "Quality Control Manager",
+    "Supply Chain Manager",
+    "Project Manager",
+    "End Users",
+    "Reports User",
+    "Security Administrator",
+  ];
+
+  const handleHeaderChange = (field, value) => {
+    setHeaderInfo({ ...headerInfo, [field]: value });
+  };
+
+  const handleRowChange = (index, field, value) => {
+    const updatedRows = [...headerInfo.rows];
+    updatedRows[index][field] = value;
+    setHeaderInfo({ ...headerInfo, rows: updatedRows });
+  };
+
+  const addRow = () => {
+    setHeaderInfo({
+      ...headerInfo,
+      rows: [
+        ...headerInfo.rows,
+        {
+          country: "",
+          organization: "",
+          location: "",
+          role: "",
+          // selected: false,
+        },
+      ],
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Form Data:", headerInfo);
+
     setLoader(true);
 
     try {
       const response = await axios.post(
         `${constantApi.baseUrl}/user_management/create`,
-        formData
+        headerInfo
       );
       alert("User Added Successfully");
       setLoader(false);
@@ -115,154 +145,154 @@ const User_Management = () => {
           </div>
         </div>
       </header>
+
       <div className="w-full max-w-4xl bg-white rounded-lg shadow-md p-8">
         <h1 className="text-2xl font-semibold text-gray-700 mb-6 text-center">
           User Management Form
         </h1>
-        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-6">
-          {/* First Name */}
-          <div className="flex flex-col">
-            <label className="text-sm font-medium text-gray-600 mb-1">
-              First Name
-            </label>
+        <div className="mb-6 bg-white p-4 rounded shadow">
+          <div className="grid grid-cols-2 gap-4 mb-4">
             <input
               type="text"
-              name="first_name"
-              value={formData.first_name}
-              onChange={handleChange}
-              placeholder="Enter First Name"
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-              required
+              placeholder="First Name"
+              value={headerInfo.first_name}
+              onChange={(e) => handleHeaderChange("first_name", e.target.value)}
+              className="border border-gray-300 p-2 rounded w-full"
+            />
+            <input
+              type="text"
+              placeholder="Last Name"
+              value={headerInfo.last_name}
+              onChange={(e) => handleHeaderChange("last_name", e.target.value)}
+              className="border border-gray-300 p-2 rounded w-full"
             />
           </div>
 
-          {/* Last Name */}
-          <div className="flex flex-col">
-            <label className="text-sm font-medium text-gray-600 mb-1">
-              Last Name
-            </label>
+          <div className="grid grid-cols-3 gap-4 mb-4">
             <input
               type="text"
-              name="last_name"
-              value={formData.last_name}
-              onChange={handleChange}
-              placeholder="Enter Last Name"
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-              required
+              placeholder="Country Code"
+              value={headerInfo.country_code}
+              onChange={(e) =>
+                handleHeaderChange("country_code", e.target.value)
+              }
+              className="border border-gray-300 p-2 rounded w-full"
             />
-          </div>
-
-          {/* Email */}
-          <div className="flex flex-col">
-            <label className="text-sm font-medium text-gray-600 mb-1">
-              Email
-            </label>
+            <input
+              type="text"
+              placeholder="phone_number Number"
+              value={headerInfo.phone_number}
+              onChange={(e) =>
+                handleHeaderChange("phone_number", e.target.value)
+              }
+              className="border border-gray-300 p-2 rounded w-full"
+            />
             <input
               type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter Email"
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-              required
+              placeholder="Email"
+              value={headerInfo.email}
+              onChange={(e) => handleHeaderChange("email", e.target.value)}
+              className="border border-gray-300 p-2 rounded w-full"
             />
           </div>
+        </div>
 
-          {/* Country Code */}
-          <div className="flex flex-col">
-            <label className="text-sm font-medium text-gray-600 mb-1">
-              Country Code
-            </label>
-            <input
-              type="text"
-              name="country_code"
-              value={formData.country_code}
-              onChange={handleChange}
-              placeholder="Enter Country Code"
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-              required
-            />
-          </div>
-
-          {/* Phone Number */}
-          <div className="flex flex-col">
-            <label className="text-sm font-medium text-gray-600 mb-1">
-              Phone Number
-            </label>
-            <input
-              type="text"
-              name="phone_number"
-              value={formData.phone_number}
-              onChange={handleChange}
-              placeholder="Enter Phone Number"
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-              required
-            />
-          </div>
-
-          {/* Location */}
-          <div className="flex flex-col">
-            <label className="text-sm font-medium text-gray-600 mb-1">
-              Location
-            </label>
-            <input
-              type="text"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              placeholder="Enter Location"
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            />
-          </div>
-
-          {/* Organisation */}
-          <div className="flex flex-col">
-            <label className="text-sm font-medium text-gray-600 mb-1">
-              Organisation
-            </label>
-            <input
-              type="text"
-              name="organisation"
-              value={formData.organisation}
-              onChange={handleChange}
-              placeholder="Enter Organisation"
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            />
-          </div>
-
-          {/* Role */}
-          <div className="flex flex-col col-span-2">
-            <label className="text-sm font-medium text-gray-600 mb-1">
-              Role
-            </label>
+        {/* role Section */}
+        {headerInfo.rows.map((row, index) => (
+          <div
+            key={index}
+            className="flex items-center gap-4 mb-4 bg-white p-4 rounded shadow"
+          >
             <select
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-              required
+              className="border border-gray-300 p-2 rounded w-1/5"
+              value={row.country}
+              onChange={(e) =>
+                handleRowChange(index, "country", e.target.value)
+              }
             >
               <option value="" disabled>
-                Select a role
+                Select Country
               </option>
-              {roles.map((role, index) => (
-                <option key={index} value={role}>
+              {countryOptions.map((country, i) => (
+                <option key={i} value={country}>
+                  {country}
+                </option>
+              ))}
+            </select>
+
+            <select
+              className="border border-gray-300 p-2 rounded w-1/5"
+              value={row.organization}
+              onChange={(e) =>
+                handleRowChange(index, "organization", e.target.value)
+              }
+            >
+              <option value="" disabled>
+                Select Organization
+              </option>
+              {organizationOptions.map((org, i) => (
+                <option key={i} value={org}>
+                  {org}
+                </option>
+              ))}
+            </select>
+
+            <select
+              className="border border-gray-300 p-2 rounded w-1/5"
+              value={row.location}
+              onChange={(e) =>
+                handleRowChange(index, "location", e.target.value)
+              }
+            >
+              <option value="" disabled>
+                Select Location
+              </option>
+              {locationOptions.map((loc, i) => (
+                <option key={i} value={loc}>
+                  {loc}
+                </option>
+              ))}
+            </select>
+
+            <select
+              className="border border-gray-300 p-2 rounded w-1/5"
+              value={row.role}
+              onChange={(e) => handleRowChange(index, "role", e.target.value)}
+            >
+              <option value="" disabled>
+                Select Role
+              </option>
+              {roles.map((role, i) => (
+                <option key={i} value={role}>
                   {role}
                 </option>
               ))}
             </select>
-          </div>
 
-          {/* Submit Button */}
-          <div className="col-span-2">
-            <button
-              type="submit"
-              className="w-full bg-blue-500 text-white font-medium py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200"
-            >
-              {loader ? "Submitting..." : "Submit"}
-            </button>
+            <input
+              type="radio"
+              className="w-5 h-5"
+              checked={row.selected}
+              onChange={() => handleRowChange(index, "selected", !row.selected)}
+            />
           </div>
-        </form>
+        ))}
+
+        {/* Buttons Section */}
+        <div className="flex gap-4">
+          <button
+            onClick={addRow}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            Add More
+          </button>
+          <button
+            onClick={handleSubmit}
+            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+          >
+            Submit
+          </button>
+        </div>
       </div>
     </div>
   );
