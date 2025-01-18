@@ -13,7 +13,7 @@ function UserRole() {
   const [locations, setLocations] = useState([]); 
   const [roles, setRoles] = useState([]); 
   const [selectedLocation, setSelectedLocation] = useState(""); 
-  const [selectedRoles, setSelectedRoles] = useState(); 
+  const [selectedRoles, setSelectedRoles] = useState(null); // Changed to store a single role
   const [actionMaster, setActionMaster] = useState([]); 
   const [functionActionMap, setFunctionActionMap] = useState([]); 
   const [existingPermissions, setExistingPermissions] = useState([]); // Step 1: Store existing permissions
@@ -80,7 +80,7 @@ function UserRole() {
 
   useEffect(() => {
     console.log(selectedRoles);
-    // Fetch existing permissions when roles are selected
+    // Fetch existing permissions when a role is selected
     if (selectedRoles) {
       const roleId = selectedRoles.value; // Assuming selectedRole is an object with a 'value' field
       const url = `${constantApi.baseUrl}/user_group/permissions/${roleId}`;  // Sending single role_id
@@ -120,7 +120,7 @@ function UserRole() {
     }));
   };
 
-  const handleRoleChange = (selectedOptions) => setSelectedRoles(selectedOptions || []);
+  const handleRoleChange = (selectedOption) => setSelectedRoles(selectedOption || null); // Allow single role selection
 
   const handleSubmit = () => {
     const finalData = [];
@@ -152,18 +152,15 @@ function UserRole() {
   
           // If actions are selected, push multiple rows
           actions.forEach((actionId) => {
-            selectedRoles.forEach((role) => {
-              // Prevent duplicate submissions for same role and action
-              if (!existingPermissions.some(permission => permission.role_id === role.value && permission.action_id === actionId)) {
-                finalData.push({
-                  module_id: moduleData.module_id,
-                  sub_module_id: subModuleData.sub_module_id,
-                  function_master_id: func.function_master_id,
-                  role_id: role.value, // Role ID
-                  action_id: actionId,  // Specific action_id for the row
-                });
-              }
-            });
+            if (!existingPermissions.some(permission => permission.role_id === selectedRoles.value && permission.action_id === actionId)) {
+              finalData.push({
+                module_id: moduleData.module_id,
+                sub_module_id: subModuleData.sub_module_id,
+                function_master_id: func.function_master_id,
+                role_id: selectedRoles.value, // Single selected role ID
+                action_id: actionId,  // Specific action_id for the row
+              });
+            }
           });
         });
       });
