@@ -1,12 +1,34 @@
 import { GiHamburgerMenu } from "react-icons/gi";
 import { CgProfile } from "react-icons/cg";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import MegaMenu from "./MegaMenu/MegaMenu";
 import { MdMenuOpen } from "react-icons/md";
 import { RiMenuFold4Line } from "react-icons/ri";
+import Cookies from "js-cookie";
+import { useCookies } from "react-cookie";
+import { useNavigate } from "react-router-dom";
 
 function TopNav({ onHamburgerClick, collapsed }) {
   const [openMegaMenu, setOpenMegaMenu] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const navigate = useNavigate();
+
+  const toggleDropdown = () => {
+    setIsOpen(!isOpen);
+  };
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    console.log("token is ---=====", token);
+  }, []);
+
+  const handleLogout = () => {
+    console.log("Logout clicked");
+    localStorage.removeItem("authToken");
+    navigate("/userlogin", { replace: true });
+
+    // navigate("/userlogin");
+  };
   const handleMegaMegu = () => {
     setOpenMegaMenu(!openMegaMenu);
   };
@@ -33,8 +55,27 @@ function TopNav({ onHamburgerClick, collapsed }) {
             <div>
               <h1 className="text-lg">Admin</h1>
             </div>
-            <div>
-              <CgProfile className="text-2xl" />
+
+            <div className="relative inline-block">
+              <div
+                onClick={toggleDropdown}
+                className="cursor-pointer flex items-center justify-center"
+              >
+                <CgProfile className="text-2xl" />
+              </div>
+              {isOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg">
+                  <button className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">
+                    Profile Visit
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

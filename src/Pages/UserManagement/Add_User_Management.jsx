@@ -110,7 +110,9 @@ const User_Management = () => {
             title="Back"
           />
           <MdSettings className="text-blue-600 text-3xl" />
-          <h1 className="text-xl font-semibold text-gray-700">Module Master</h1>
+          <h1 className="text-xl font-semibold text-gray-700">
+            User management
+          </h1>
         </div>
         <div className="flex items-center gap-4">
           <input

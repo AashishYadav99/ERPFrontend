@@ -18,11 +18,16 @@ function SideNavbar({ collapsed }) {
   const location = useLocation(); // Get the current location
 
   const menuItems = [
-    { icon: <MdDashboardCustomize />, text: "Dashboard", route: "#" },
+    { icon: <MdDashboardCustomize />, text: "Dashboard", route: "/dashboard" },
     { icon: <FaUsers />, text: "Module Master", route: "/module_master" },
-    { icon: <FaUsers />, text: "Sub Module Master", route: "/sub_module_master" },
+    {
+      icon: <FaUsers />,
+      text: "Sub Module Master",
+      route: "/sub_module_master",
+    },
     { icon: <FaUsers />, text: "Function Master", route: "/function_master" },
     { icon: <FaWarehouse />, text: "User Groups", route: "/userrole" },
+    { icon: <FaWarehouse />, text: "Role Master", route: "/role_master" },
     { icon: <FaLocationArrow />, text: "Location", route: "/location" },
     { icon: <FaBuilding />, text: "Company", route: "/company" },
     { icon: <FaBox />, text: "User Management", route: "/user_management" },

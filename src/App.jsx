@@ -21,7 +21,6 @@ import Loader from "./Pages/Loader";
 import Test from "./components/Test";
 import Edit_Module_Master from "./Pages/ModuleMaster/Edit_Module_Master";
 import Edit_Sub_Module_Master from "./Pages/Sub_ModuleMaster/Edit_Sub_Module_Master";
-import UserLoginPage from "./Pages/UserManagement/UserLoginPage";
 import Function_Master from "./Pages/FunctionMaster/Function_Master";
 import Add_Function_Master from "./Pages/FunctionMaster/Add_Function_Master";
 import View_Module_Master from "./Pages/ModuleMaster/View_Module_Master";
@@ -35,6 +34,13 @@ import View_User_Management from "./Pages/UserManagement/View_User_Management";
 import Edit_User_Management from "./Pages/UserManagement/Edit_User_Management";
 import Add_Company from "./Pages/Company/Add_Company";
 import Add_Location from "./Pages/Location/Add_Location";
+import UserRegisterPage from "./Pages/User/UserRegisterPage";
+import UsersList from "./Pages/User/UsersList";
+import Dashboard from "./Pages/Dashboard/Dashboard";
+import UserLoginPage from "./Pages/User/UserLoginPage";
+import Add_Role_Master from "./Pages/UserRole/Add_Role_Master";
+import Role_Masters from "./Pages/UserRole/Role_Master";
+import Edit_Role_Master from "./Pages/UserRole/Edit_Role_Master";
 
 const Layout = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -57,21 +63,15 @@ const Layout = () => {
 };
 
 const ProtectedRoute = ({ children }) => {
-  const [cookies] = useCookies(["userToken"]);
-  const token = cookies.userToken || localStorage.getItem("token");
-
+  // const [cookies] = useCookies(["authToken"]);
+  // const token = cookies.userToken || localStorage.getItem("authToken");
+  const token = localStorage.getItem("authToken");
   return token ? children : <Navigate to="/userlogin" />;
 };
 
 function App() {
-  const [cookies, , removeCookie] = useCookies(["userToken"]);
-  const token = cookies.userToken || localStorage.getItem("token");
-
-  // useEffect(() => {
-  //   if (localStorage.getItem("token")) {
-  //     setIsAuthenticated(true); // Check if the user token exists in localStorage
-  //   }
-  // }, []);
+  const [cookies, , removeCookie] = useCookies(["authToken"]);
+  const token = cookies.userToken || localStorage.getItem("authToken");
 
   return (
     <Router>
@@ -79,7 +79,7 @@ function App() {
         {/* Redirect to dashboard if token exists */}
         <Route
           path="/userlogin"
-          element={token ? <Navigate to="/module_master" /> : <UserLoginPage />}
+          element={token ? <Navigate to="/dashboard" /> : <UserLoginPage />}
         />
         {/* Protected routes */}
         <Route
@@ -90,6 +90,7 @@ function App() {
             </ProtectedRoute>
           }
         >
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/module_master" element={<Module_Masters />} />
           <Route path="/add_module_master" element={<Add_Module_Master />} />
           <Route path="/edit_module_master" element={<Edit_Module_Master />} />
@@ -136,6 +137,9 @@ function App() {
           />
 
           <Route path="/userrole" element={<UserRole />} />
+          <Route path="/role_master" element={<Role_Masters />} />
+          <Route path="/add_role_master" element={<Add_Role_Master />} />
+          <Route path="/edit_role_master" element={<Edit_Role_Master />} />
           <Route path="/warehouse" element={<Warehouse />} />
           <Route path="/addwarehouse" element={<AddWarehouse />} />
           <Route path="/company" element={<Company />} />
@@ -145,6 +149,12 @@ function App() {
           <Route path="/loader" element={<Loader />} />
           <Route path="/test" element={<Test />} />
           <Route path="/userlogin" element={<UserLoginPage />} />
+          <Route
+            path="/user_registration_page"
+            element={<UserRegisterPage />}
+          />
+          <Route path="/user_list" element={<UsersList />} />
+
           {/* </Route> */}
         </Route>
       </Routes>
