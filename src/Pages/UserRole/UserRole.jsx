@@ -9,19 +9,28 @@ function UserRole() {
   const [function_master, setFunction_master] = useState([]);
   const [filteredSubModules, setFilteredSubModules] = useState({});
   const [checkboxState, setCheckboxState] = useState({});
-  const [searchQuery, setSearchQuery] = useState(""); 
-  const [locations, setLocations] = useState([]); 
-  const [roles, setRoles] = useState([]); 
-  const [selectedLocation, setSelectedLocation] = useState(""); 
-  const [selectedRoles, setSelectedRoles] = useState(null); // Changed to store a single role
-  const [actionMaster, setActionMaster] = useState([]); 
-  const [functionActionMap, setFunctionActionMap] = useState([]); 
-  const [existingPermissions, setExistingPermissions] = useState([]); // Step 1: Store existing permissions
-  const [roleChanged, setRoleChanged] = useState(false); // Track if role is changed
-  const [noRecords, setNoRecords] = useState(false); // Track if no records exist for the selected role
+  const [searchQuery, setSearchQuery] = useState("");
+  const [locations, setLocations] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState("");
+  const [selectedRoles, setSelectedRoles] = useState(null);
+  const [actionMaster, setActionMaster] = useState([]);
+  const [functionActionMap, setFunctionActionMap] = useState([]);
+  const [existingPermissions, setExistingPermissions] = useState([]);
+  const [roleChanged, setRoleChanged] = useState(false);
+  const [noRecords, setNoRecords] = useState(false);
 
   useEffect(() => {
-    // Fetching all data like modules, sub-modules, function masters, etc.
+    axios.get(`${constantApi.baseUrl}/role_master/list`)
+      .then((res) => {
+        const roleOptions = res.data.data.map(role => ({
+          value: role.role_id,
+          label: role.role_name
+        }));
+        setRoles(roleOptions);
+      })
+      .catch((err) => console.error("Error fetching roles:", err));
+
     axios.get(`${constantApi.baseUrl}/module_master/list`)
       .then((res) => setModules(res.data.data))
       .catch((err) => console.error("Error fetching modules:", err));
@@ -60,41 +69,21 @@ function UserRole() {
     axios.get(`${constantApi.baseUrl}/function_action_master_map/list`)
       .then((res) => setFunctionActionMap(res.data.data))
       .catch((err) => console.error("Error fetching function-action mapping:", err));
-
-    setRoles([
-      { value: 1, label: "System Administrator" },
-      { value: 2, label: "Superuser" },
-      { value: 3, label: "Business Administrator" },
-      { value: 4, label: "Finance Manager" },
-      { value: 5, label: "HR Manager" },
-      { value: 6, label: "Warehouse Manager" },
-      { value: 7, label: "Procurement Manager" },
-      { value: 8, label: "Sales Manager" },
-      { value: 9, label: "Production Manager" },
-      { value: 10, label: "Quality Control Manager" },
-      { value: 11, label: "Supply Chain Manager" },
-      { value: 12, label: "Project Manager" },
-      { value: 13, label: "End Users" },
-      { value: 14, label: "Reports User" },
-      { value: 15, label: "Security Administrator" },
-    ]);
   }, []);
 
   useEffect(() => {
-    // Fetch existing permissions when roles are selected
     if (selectedRoles) {
-      const roleId = selectedRoles.value; // Assuming selectedRole is an object with a 'value' field
-      const url = `${constantApi.baseUrl}/user_group/permissions/${roleId}`;  // URL with role_id in path
-  
+      const roleId = selectedRoles.value;
+      const url = `${constantApi.baseUrl}/user_group/permissions/${roleId}`;
+
       axios.get(url)
         .then((res) => {
           if (res.data.data.length === 0) {
-            setNoRecords(true); // Set flag to show no records message
+            setNoRecords(true);
           } else {
-            setExistingPermissions(res.data.data); // Store existing permissions
+            setExistingPermissions(res.data.data);
             const updatedCheckboxState = { ...checkboxState };
 
-            // Pre-check checkboxes based on existing permissions, but only if the role has changed
             if (roleChanged) {
               res.data.data.forEach(permission => {
                 const { function_master_id, action_id } = permission;
@@ -103,82 +92,113 @@ function UserRole() {
                 if (actionName) {
                   updatedCheckboxState[function_master_id] = {
                     ...updatedCheckboxState[function_master_id],
-                    [actionName]: 1, // Mark checkbox as checked
+                    [actionName]: 1,
                   };
                 }
               });
-              setCheckboxState(updatedCheckboxState); // Update checkbox state
-              setRoleChanged(false); // Reset role change flag
+              setCheckboxState(updatedCheckboxState);
+              setRoleChanged(false);
             }
-            setNoRecords(false); // Reset no records flag if records exist
+            setNoRecords(false);
           }
         })
         .catch((err) => console.error("Error fetching existing permissions:", err));
     }
-  }, [selectedRoles, actionMaster, roleChanged]); // Depend on roleChanged to trigger the effect
+  }, [selectedRoles, actionMaster, roleChanged]);
 
-  const handleSearch = (event) => setSearchQuery(event.target.value);
+  const handleSearch = (event) => {
+    setSearchQuery(event.target.value.toLowerCase());
+  };
+
+  const filteredData = modules.filter(moduleData => {
+    const subModules = filteredSubModules[moduleData.module_id] || [];
+
+    // Check if any field in module, sub-module, function, or action matches search query
+    return moduleData.module_name.toLowerCase().includes(searchQuery) ||
+      subModules.some(subModule => {
+        return subModule.sub_module_name.toLowerCase().includes(searchQuery) ||
+          function_master.some(func => {
+            return func.sub_module_id === subModule.sub_module_id && 
+              func.function_master_name.toLowerCase().includes(searchQuery) &&
+              functionActionMap.some(map => {
+                return map.function_master_id === func.function_master_id &&
+                  actionMaster.some(action => {
+                    return action.action_id === map.action_id &&
+                      action.action_name.toLowerCase().includes(searchQuery);
+                  });
+              });
+          });
+      });
+  });
+
+  const filteredFunctionsAndActions = function_master.filter(func => {
+    return func.function_master_name.toLowerCase().includes(searchQuery) ||
+      functionActionMap.some(map => {
+        return map.function_master_id === func.function_master_id &&
+          actionMaster.some(action => {
+            return action.action_id === map.action_id &&
+              action.action_name.toLowerCase().includes(searchQuery);
+          });
+      });
+  });
 
   const handleActionChange = (functionId, action) => {
     setCheckboxState((prevState) => ({
       ...prevState,
       [functionId]: {
         ...prevState[functionId],
-        [action]: prevState[functionId]?.[action] === 1 ? 0 : 1, // Toggle between 1 and 0
+        [action]: prevState[functionId]?.[action] === 1 ? 0 : 1,
       },
     }));
   };
 
   const handleRoleChange = (selectedOption) => {
-    setSelectedRoles(selectedOption || null); // Allow single role selection
-    setRoleChanged(true); // Set role change flag to trigger useEffect
+    setSelectedRoles(selectedOption || null);
+    setRoleChanged(true);
   };
 
   const handleSubmit = () => {
     const finalData = [];
-  
+
     modules.forEach((moduleData) => {
       const subModules = filteredSubModules[moduleData.module_id] || [];
-  
+
       subModules.forEach((subModuleData) => {
         const functions = function_master.filter(
           (func) => func.sub_module_id === subModuleData.sub_module_id
         );
-  
+
         functions.forEach((func) => {
           const actionsForFunction = functionActionMap
             .filter((map) => map.function_master_id === func.function_master_id)
             .map((map) => map.action_id);
-  
-          // Gather all selected actions for the function
+
           const actions = actionMaster
             .filter((action) => actionsForFunction.includes(action.action_id))
             .reduce((acc, action) => {
               const actionValue = checkboxState[func.function_master_id]?.[action.action_name] || 0;
-  
+
               if (actionValue === 1) {
-                acc.push(action.action_id); // Add the selected action_id to the list
+                acc.push(action.action_id);
               }
               return acc;
             }, []);
-  
-          // If actions are selected, push multiple rows
+
           actions.forEach((actionId) => {
             if (!existingPermissions.some(permission => permission.role_id === selectedRoles.value && permission.action_id === actionId)) {
               finalData.push({
                 module_id: moduleData.module_id,
                 sub_module_id: subModuleData.sub_module_id,
                 function_master_id: func.function_master_id,
-                role_id: selectedRoles.value, // Single selected role ID
-                action_id: actionId,  // Specific action_id for the row
+                role_id: selectedRoles.value,
+                action_id: actionId,
               });
             }
           });
         });
       });
     });
-  
-    // Submit the final data only if there is data to submit
+
     if (finalData.length > 0) {
       axios
         .post(`${constantApi.baseUrl}/user_group/bulk`, { data: finalData }, {
@@ -198,12 +218,11 @@ function UserRole() {
       alert("No actions selected. Please select at least one action.");
     }
   };
-  
+
   return (
     <div className="px-4 py-6 bg-white text-gray-800 shadow-lg rounded-lg max-w-7xl mx-auto overflow-x-auto">
       <h6 className="text-2xl font-semibold mb-6">Assign Roles, Permissions, and Actions to User Groups</h6>
-      
-      {/* Role Dropdown */}
+
       <div className="mb-6 flex space-x-6">
         <div className="w-1/3">
           <label htmlFor="roles" className="block text-sm font-medium mb-2">Role</label>
@@ -218,7 +237,6 @@ function UserRole() {
           />
         </div>
 
-        {/* Search Box */}
         <div className="w-1/3">
           <label htmlFor="search" className="block text-sm font-medium mb-2">Search</label>
           <input
@@ -232,14 +250,12 @@ function UserRole() {
         </div>
       </div>
 
-      {/* No Records Message */}
       {noRecords && (
         <div className="bg-yellow-200 text-yellow-700 p-3 rounded-md mb-4">
           No records exist for the selected role.
         </div>
       )}
 
-      {/* Table with Permissions */}
       <table className="w-full table-auto border-separate border-spacing-0">
         <thead className="bg-gray-200 text-sm text-gray-600 sticky top-0">
           <tr>
@@ -250,13 +266,15 @@ function UserRole() {
           </tr>
         </thead>
         <tbody className="text-sm text-gray-700">
-          {modules.map((moduleData, index) => {
-            const subModules = filteredSubModules[moduleData.module_id] || [];
+          {filteredData.map((moduleData, index) => {
+            const subModules = (filteredSubModules[moduleData.module_id] || []).filter(subModuleData =>
+              subModuleData.sub_module_name.toLowerCase().includes(searchQuery.toLowerCase())
+            );
             return subModules.map((subModuleData, subIndex) => {
-              const functions = function_master.filter(
+              const filteredFunctions = filteredFunctionsAndActions.filter(
                 (func) => func.sub_module_id === subModuleData.sub_module_id
               );
-              return functions.map((func, funcIndex) => {
+              return filteredFunctions.map((func, funcIndex) => {
                 const actionsForFunction = functionActionMap
                   .filter((map) => map.function_master_id === func.function_master_id)
                   .map((map) => map.action_id);
@@ -264,12 +282,12 @@ function UserRole() {
                 return (
                   <tr key={`${index}-${subIndex}-${funcIndex}`} className="hover:bg-gray-50">
                     {funcIndex === 0 && (
-                      <td rowSpan={functions.length} className="px-3 py-1 border bg-blue-100">
+                      <td rowSpan={filteredFunctions.length} className="px-3 py-1 border bg-blue-100">
                         {moduleData.module_name}
                       </td>
                     )}
                     {funcIndex === 0 && (
-                      <td rowSpan={functions.length} className="px-3 py-1 border bg-green-100">
+                      <td rowSpan={filteredFunctions.length} className="px-3 py-1 border bg-green-100">
                         {subModuleData.sub_module_name}
                       </td>
                     )}
@@ -279,6 +297,7 @@ function UserRole() {
                     <td className="px-3 py-1 border">
                       {actionMaster
                         .filter((action) => actionsForFunction.includes(action.action_id))
+                        .filter((action) => action.action_name.toLowerCase().includes(searchQuery.toLowerCase()))
                         .map((action) => (
                           <label key={action.action_id} className="inline-flex items-center mr-2 text-sm">
                             <input
@@ -299,11 +318,10 @@ function UserRole() {
         </tbody>
       </table>
 
-      {/* Submit Button */}
-      <div className="mt-6 flex justify-center">
+      <div className="mt-4 text-right">
         <button
           onClick={handleSubmit}
-          className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700"
+          className="bg-blue-500 text-white px-4 py-2 rounded-lg"
         >
           Submit
         </button>
