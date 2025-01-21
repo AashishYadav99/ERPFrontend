@@ -12,6 +12,8 @@ const UsersList = () => {
   const [usersData, setUsersData] = useState([]);
   const [popoverId, setPopoverId] = useState(null);
   const [searchInput, setSearchInput] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,9 +44,13 @@ const UsersList = () => {
     //   .catch((err) => alert("Failed to delete the module."));
   };
 
-  //   const filteredModules = usersData.filter((data) =>
-  //     data.first_name.toLowerCase().includes(searchInput.toLowerCase())
-  //   );
+  // Filter data whenever searchInput or usersData changes
+  useEffect(() => {
+    const filtered = usersData.filter((data) =>
+      data.firstname.toLowerCase().includes(searchInput.toLowerCase())
+    );
+    setFilteredData(filtered);
+  }, [usersData, searchInput]);
 
   return (
     <div className="max-w-7xl mx-auto p-4 bg-gray-100 min-h-screen">
@@ -69,7 +75,7 @@ const UsersList = () => {
             className="w-64 px-3 py-2 border rounded-lg text-gray-700 focus:ring-blue-500 focus:border-blue-500"
             placeholder="Search by Name"
           />
-          <Link to="/add_user_management">
+          <Link to="/user_registration_page">
             <button className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition">
               + New
             </button>
@@ -109,8 +115,8 @@ const UsersList = () => {
             </tr>
           </thead>
           <tbody>
-            {usersData.map((data) => (
-              <tr key={data.module_id} className="border-b">
+            {filteredData.map((data) => (
+              <tr key={data.id} className="border-b">
                 <td className="p-4 leading-tight">{data.firstname}</td>
                 <td className="p-4 leading-tight">{data.lastname}</td>
                 <td className="p-4 leading-tight">{data.email}</td>

@@ -27,6 +27,7 @@ function SideNavbar({ collapsed }) {
     },
     { icon: <FaUsers />, text: "Function Master", route: "/function_master" },
     { icon: <FaWarehouse />, text: "User Groups", route: "/userrole" },
+    { icon: <FaWarehouse />, text: "User List", route: "/user_list" },
     { icon: <FaWarehouse />, text: "Role Master", route: "/role_master" },
     { icon: <FaLocationArrow />, text: "Location", route: "/location" },
     { icon: <FaBuilding />, text: "Company", route: "/company" },
