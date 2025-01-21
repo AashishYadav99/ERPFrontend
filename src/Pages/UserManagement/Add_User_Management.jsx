@@ -36,22 +36,24 @@ const User_Management = () => {
   const countryOptions = ["Country 1", "Country 2"];
   const organizationOptions = ["Organization 1", "Organization 2"];
   const locationOptions = ["Location 1", "Location 2"];
+  // const [roles, setRoles] = useState([]); 
+  
   const roles = [
-    "System Administrator",
-    "Superuser",
-    "Business Administrator",
-    "Finance Manager",
-    "HR Manager",
-    "Warehouse Manager",
-    "Procurement Manager",
-    "Sales Manager",
-    "Production Manager",
-    "Quality Control Manager",
-    "Supply Chain Manager",
-    "Project Manager",
-    "End Users",
-    "Reports User",
-    "Security Administrator",
+    { value: 1, label: "System Administrator" },
+    { value: 2, label: "Superuser" },
+    { value: 3, label: "Business Administrator" },
+    { value: 4, label: "Finance Manager" },
+    { value: 5, label: "HR Manager" },
+    { value: 6, label: "Warehouse Manager" },
+    { value: 7, label: "Procurement Manager" },
+    { value: 8, label: "Sales Manager" },
+    { value: 9, label: "Production Manager" },
+    { value: 10, label: "Quality Control Manager" },
+    { value: 11, label: "Supply Chain Manager" },
+    { value: 12, label: "Project Manager" },
+    { value: 13, label: "End Users" },
+    { value: 14, label: "Reports User" },
+    { value: 15, label: "Security Administrator" },
   ];
 
   const handleHeaderChange = (field, value) => {
@@ -263,8 +265,8 @@ const User_Management = () => {
                 Select Role
               </option>
               {roles.map((role, i) => (
-                <option key={i} value={role}>
-                  {role}
+                <option key={i} value={role.value}>
+                  {role.label}
                 </option>
               ))}
             </select>

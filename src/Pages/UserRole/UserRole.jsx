@@ -17,6 +17,8 @@ function UserRole() {
   const [actionMaster, setActionMaster] = useState([]); 
   const [functionActionMap, setFunctionActionMap] = useState([]); 
   const [existingPermissions, setExistingPermissions] = useState([]); // Step 1: Store existing permissions
+  const [roleChanged, setRoleChanged] = useState(false); // Track if role is changed
+  const [noRecords, setNoRecords] = useState(false); // Track if no records exist for the selected role
 
   useEffect(() => {
     // Fetching all data like modules, sub-modules, function masters, etc.
@@ -79,34 +81,41 @@ function UserRole() {
   }, []);
 
   useEffect(() => {
-    console.log(selectedRoles);
-    // Fetch existing permissions when a role is selected
+    // Fetch existing permissions when roles are selected
     if (selectedRoles) {
       const roleId = selectedRoles.value; // Assuming selectedRole is an object with a 'value' field
-      const url = `${constantApi.baseUrl}/user_group/permissions/${roleId}`;  // Sending single role_id
+      const url = `${constantApi.baseUrl}/user_group/permissions/${roleId}`;  // URL with role_id in path
+  
       axios.get(url)
         .then((res) => {
-          setExistingPermissions(res.data.data); // Store existing permissions
-          const updatedCheckboxState = { ...checkboxState };
+          if (res.data.data.length === 0) {
+            setNoRecords(true); // Set flag to show no records message
+          } else {
+            setExistingPermissions(res.data.data); // Store existing permissions
+            const updatedCheckboxState = { ...checkboxState };
 
-          // Pre-check checkboxes based on existing permissions
-          res.data.data.forEach(permission => {
-            const { function_master_id, action_id } = permission;
-            const actionName = actionMaster.find(action => action.action_id === action_id)?.action_name;
+            // Pre-check checkboxes based on existing permissions, but only if the role has changed
+            if (roleChanged) {
+              res.data.data.forEach(permission => {
+                const { function_master_id, action_id } = permission;
+                const actionName = actionMaster.find(action => action.action_id === action_id)?.action_name;
 
-            if (actionName) {
-              updatedCheckboxState[function_master_id] = {
-                ...updatedCheckboxState[function_master_id],
-                [actionName]: 1, // Mark checkbox as checked
-              };
+                if (actionName) {
+                  updatedCheckboxState[function_master_id] = {
+                    ...updatedCheckboxState[function_master_id],
+                    [actionName]: 1, // Mark checkbox as checked
+                  };
+                }
+              });
+              setCheckboxState(updatedCheckboxState); // Update checkbox state
+              setRoleChanged(false); // Reset role change flag
             }
-          });
-
-          setCheckboxState(updatedCheckboxState); // Update checkbox state
+            setNoRecords(false); // Reset no records flag if records exist
+          }
         })
         .catch((err) => console.error("Error fetching existing permissions:", err));
     }
-  }, [selectedRoles, actionMaster, checkboxState]);
+  }, [selectedRoles, actionMaster, roleChanged]); // Depend on roleChanged to trigger the effect
 
   const handleSearch = (event) => setSearchQuery(event.target.value);
 
@@ -120,7 +129,10 @@ function UserRole() {
     }));
   };
 
-  const handleRoleChange = (selectedOption) => setSelectedRoles(selectedOption || null); // Allow single role selection
+  const handleRoleChange = (selectedOption) => {
+    setSelectedRoles(selectedOption || null); // Allow single role selection
+    setRoleChanged(true); // Set role change flag to trigger useEffect
+  };
 
   const handleSubmit = () => {
     const finalData = [];
@@ -219,6 +231,13 @@ function UserRole() {
           />
         </div>
       </div>
+
+      {/* No Records Message */}
+      {noRecords && (
+        <div className="bg-yellow-200 text-yellow-700 p-3 rounded-md mb-4">
+          No records exist for the selected role.
+        </div>
+      )}
 
       {/* Table with Permissions */}
       <table className="w-full table-auto border-separate border-spacing-0">
