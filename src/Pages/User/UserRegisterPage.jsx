@@ -112,13 +112,19 @@ const UserRegisterPage = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: parseInt(value) });  // Ensure the value is treated as an integer
+
+    // Only parse integers for fields that expect numbers (e.g., role_id, mobile, etc.)
+    if (name === "role_id" || name === "mobile" || name === "phonecode" || name === "location" || name === "organization") {
+      setFormData({ ...formData, [name]: parseInt(value) });
+    } else {
+      setFormData({ ...formData, [name]: value }); // Keep other fields as strings
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoader(true);
-  
+
     // Consolidate form data and dynamic row data
     const submissionData = {
       ...formData,  // Basic user details
@@ -130,7 +136,7 @@ const UserRegisterPage = () => {
       }))
     };
     console.log("submissionData", submissionData);
-  
+
     try {
       const response = await axios.post(`${constantApi.baseUrl}/register`, submissionData);
       console.log("response:", response);
@@ -217,12 +223,12 @@ const UserRegisterPage = () => {
                 Mobile Code
               </label>
               <select
-                name="Mobilecode"
+                name="phonecode"
                 value={formData.phonecode}
                 onChange={handleChange}
                 className="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
               >
-                <option value="" disabled>Select Phone Code</option>
+                <option value="" disabled>Select Mobile Code</option>
                 {countryOptions.map((country, i) => (
                   <option key={i} value={country.value}>{country.label}</option>
                 ))}
