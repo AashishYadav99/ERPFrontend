@@ -214,10 +214,10 @@ const UserRegisterPage = () => {
           <div className="grid grid-cols-4 gap-6 items-center my-4">
             <div className="flex flex-col">
               <label className="text-sm font-medium text-gray-600 mb-1">
-                Phone Code
+                Mobile Code
               </label>
               <select
-                name="phonecode"
+                name="Mobilecode"
                 value={formData.phonecode}
                 onChange={handleChange}
                 className="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
