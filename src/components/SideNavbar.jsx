@@ -33,14 +33,18 @@ function SideNavbar({ collapsed }) {
     { icon: <FaBuilding />, text: "Company", route: "/company" },
     { icon: <FaBox />, text: "User Management", route: "/user_management" },
     { icon: <FaWarehouse />, text: "Warehouse", route: "/warehouse" },
-    { icon: <FaBox />, text: "Item", route: "#" },
+    { icon: <FaBox />, text: "Item", route: "/item" },
+    { icon: <FaTags />, text: "Item Category", route: "/itemcategory" },
+    { icon: <FaTags />, text: "Family Master", route: "/family_master" },
     { icon: <FaBuilding />, text: "Brand Master", route: "/modulemasters" },
     { icon: <FaTags />, text: "UOM", route: "#" },
     { icon: <FaTags />, text: "Tax Master", route: "#" },
-    { icon: <FaTags />, text: "Item Category", route: "#" },
-    { icon: <FaTags />, text: "Family Master", route: "#" },
     { icon: <FaChartBar />, text: "Report", route: "#" },
     { icon: <FaMoneyBillWave />, text: "Payment", route: "#" },
+    { icon: <FaMoneyBillWave />, text: "Emirates", route: "emirates" },
+    { icon: <FaMoneyBillWave />, text: "Country", route: "country" },
+    { icon: <FaMoneyBillWave />, text: "Currency", route: "currency" },
+    // { icon: <FaMoneyBillWave />, text: "Category", route: "itemcategory" },
   ];
 
   return (
