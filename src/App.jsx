@@ -18,7 +18,6 @@ import Sub_Module_Master from "./Pages/Sub_ModuleMaster/Sub_Module_Master";
 import Add_Sub_Module_Master from "./Pages/Sub_ModuleMaster/Add_Sub_Module_Master";
 import Add_Module_Master from "./Pages/ModuleMaster/Add_Module_Master";
 import Loader from "./Pages/Loader";
-import Test from "./components/Test";
 import Edit_Module_Master from "./Pages/ModuleMaster/Edit_Module_Master";
 import Edit_Sub_Module_Master from "./Pages/Sub_ModuleMaster/Edit_Sub_Module_Master";
 import Function_Master from "./Pages/FunctionMaster/Function_Master";
@@ -32,7 +31,7 @@ import User_Management from "./Pages/UserManagement/User_Management";
 import Add_User_Management from "./Pages/UserManagement/Add_User_Management";
 import View_User_Management from "./Pages/UserManagement/View_User_Management";
 import Edit_User_Management from "./Pages/UserManagement/Edit_User_Management";
-import Add_Company from "./Pages/Company/Add_Company";
+// import Add_company2 from "./Pages/Company/Add_company2";
 import Add_Location from "./Pages/Location/Add_Location";
 import UserRegisterPage from "./Pages/User/UserRegisterPage";
 import UsersList from "./Pages/User/UsersList";
@@ -41,6 +40,22 @@ import UserLoginPage from "./Pages/User/UserLoginPage";
 import Add_Role_Master from "./Pages/UserRole/Add_Role_Master";
 import Role_Masters from "./Pages/UserRole/Role_Master";
 import Edit_Role_Master from "./Pages/UserRole/Edit_Role_Master";
+import Emirates from "./Pages/Emirates/Emirates";
+import Add_Emirates from "./Pages/Emirates/Add_Emirates";
+import Country from "./Pages/Country/Country";
+import Add_Country from "./Pages/Country/Add_Country";
+import Edit_Country from "./Pages/Country/Edit_Country";
+import ParentComponent from "./Pages/Company/ParentComponent";
+import CompanyLocation from "./Pages/Company/CompanyLocation";
+import AddCurrency from "./Pages/Currency/AddCurrency";
+import Currency from "./Pages/Currency/Currency";
+import ItemCategory from "./Pages/ItemCategory/ItemCategory";
+import Add_Item_Category from "./Pages/ItemCategory/Add_Item_Category";
+import FamilyMaster from "./Pages/FamilyMaster/FamilyMaster";
+import AddFamilyMaster from "./Pages/FamilyMaster/AddFamilyMaster";
+import Item from "./Pages/Items/Item";
+import Itemssell from "./Pages/Items/Itemssell";
+import AddBrand from "./Pages/Brand/AddBrand";
 
 const Layout = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -143,17 +158,32 @@ function App() {
           <Route path="/warehouse" element={<Warehouse />} />
           <Route path="/addwarehouse" element={<AddWarehouse />} />
           <Route path="/company" element={<Company />} />
-          <Route path="/add_company" element={<Add_Company />} />
+          <Route path="/parentcompany" element={<ParentComponent />} />
           <Route path="/location" element={<Location />} />
           <Route path="/add_location" element={<Add_Location />} />
           <Route path="/loader" element={<Loader />} />
-          <Route path="/test" element={<Test />} />
           <Route path="/userlogin" element={<UserLoginPage />} />
           <Route
             path="/user_registration_page"
             element={<UserRegisterPage />}
           />
           <Route path="/user_list" element={<UsersList />} />
+
+          <Route path="/emirates" element={<Emirates />} />
+          <Route path="/add_emirates" element={<Add_Emirates />} />
+          <Route path="/country" element={<Country />} />
+          <Route path="/add_country" element={<Add_Country />} />
+          <Route path="/edit_country" element={<Edit_Country />} />
+          <Route path="/clocation" element={<CompanyLocation />} />
+          <Route path="/currency" element={<Currency />} />
+          <Route path="/add_currency" element={<AddCurrency />} />
+          <Route path="/itemcategory" element={<ItemCategory />} />
+          <Route path="/add_item_category" element={<Add_Item_Category />} />
+          <Route path="/family_master" element={<FamilyMaster />} />
+          <Route path="/add_family_master" element={<AddFamilyMaster />} />
+          <Route path="/item" element={<Item />} />
+          <Route path="/itemssell" element={<Itemssell />} />
+          <Route path="/addbrand" element={<AddBrand />} />
 
           {/* </Route> */}
         </Route>
